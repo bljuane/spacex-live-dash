@@ -127,6 +127,10 @@ h1 {
   border: 0;
   display: block;
 }
+.tv-chart {
+  position: absolute;
+  inset: 0;
+}
 .chart-fallback {
   position: absolute;
   inset: 0;
@@ -372,16 +376,11 @@ python3 -m http.server 8000
     <div class="chart-head">
       <div class="left">
         <span class="venue">Binance</span>
-        <span class="market">BINANCE:SPCXUSDT</span>
+        <span class="market">SPCXUSDT</span>
       </div>
       <div class="live-price" id="livehead-binance">—</div>
     </div>
-    <div class="chart-frame-wrap">
-      <div class="chart-fallback"><strong>Loading TradingView…</strong><span>BINANCE:SPCXUSDT</span></div>
-      <iframe
-        src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ASPCXUSDT&interval=5&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&hideideas=1&theme=dark&style=1&timezone=Etc/UTC&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en"
-        allowtransparency="true" allowfullscreen></iframe>
-    </div>
+    <div class="chart-frame-wrap"><div class="tv-chart" id="chart-binance"></div></div>
   </div>
 
   <div class="chart-card">
@@ -392,14 +391,7 @@ python3 -m http.server 8000
       </div>
       <div class="live-price" id="livehead-tradexyz">—</div>
     </div>
-    <div class="chart-frame-wrap">
-      <div class="chart-fallback">
-        <strong>Embed blocked by trade.xyz</strong>
-        <span>Their app sets X-Frame-Options to prevent embedding.<br>Live price + sparkline shown in card below.</span>
-        <a href="https://app.trade.xyz/?market=SPCX" target="_blank">↗ Open chart on trade.xyz</a>
-      </div>
-      <iframe src="https://app.trade.xyz/?market=SPCX" referrerpolicy="no-referrer"></iframe>
-    </div>
+    <div class="chart-frame-wrap"><div class="tv-chart" id="chart-tradexyz"></div></div>
   </div>
 
   <div class="chart-card">
@@ -410,32 +402,18 @@ python3 -m http.server 8000
       </div>
       <div class="live-price" id="livehead-ventuals">—</div>
     </div>
-    <div class="chart-frame-wrap">
-      <div class="chart-fallback">
-        <strong>Embed blocked by Ventuals</strong>
-        <span>Their app sets X-Frame-Options to prevent embedding.<br>Live price + sparkline shown in card below.</span>
-        <a href="https://app.ventuals.com/perp/SPACEX" target="_blank">↗ Open chart on Ventuals</a>
-      </div>
-      <iframe src="https://app.ventuals.com/perp/SPACEX" referrerpolicy="no-referrer"></iframe>
-    </div>
+    <div class="chart-frame-wrap"><div class="tv-chart" id="chart-ventuals"></div></div>
   </div>
 
   <div class="chart-card">
     <div class="chart-head">
       <div class="left">
         <span class="venue">Lighter</span>
-        <span class="market">SPACEX</span>
+        <span class="market">SPACEX (id 173)</span>
       </div>
       <div class="live-price" id="livehead-lighter">—</div>
     </div>
-    <div class="chart-frame-wrap">
-      <div class="chart-fallback">
-        <strong>Embed blocked by Lighter</strong>
-        <span>Their app sets X-Frame-Options to prevent embedding.<br>Live price + sparkline shown in card below.</span>
-        <a href="https://app.lighter.xyz/trade/SPACEX" target="_blank">↗ Open chart on Lighter</a>
-      </div>
-      <iframe src="https://app.lighter.xyz/trade/SPACEX" referrerpolicy="no-referrer"></iframe>
-    </div>
+    <div class="chart-frame-wrap"><div class="tv-chart" id="chart-lighter"></div></div>
   </div>
 </div>
 
@@ -511,10 +489,145 @@ python3 -m http.server 8000
   <strong>Data sources:</strong> Binance USDM Futures WS · Hyperliquid WS (xyz + vntl dexes via <code>activeAssetCtx</code>) · Lighter WS (market_stats channel)
 </div>
 
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script>
 // ============================================================
 //   SpaceX multi-venue live dashboard
 // ============================================================
+
+// ─── Chart factory (Lightweight Charts, TradingView's free OSS lib) ───
+const charts = {};
+function makeChart(containerId, venueKey) {
+  const el = document.getElementById(containerId);
+  if (!el || !window.LightweightCharts) return null;
+  const c = LightweightCharts.createChart(el, {
+    layout: { background: { color: "transparent" }, textColor: "#8888aa" },
+    grid: {
+      vertLines: { color: "rgba(42,42,74,0.3)" },
+      horzLines: { color: "rgba(42,42,74,0.3)" },
+    },
+    timeScale: { timeVisible: true, secondsVisible: false, borderColor: "#2a2a4a" },
+    rightPriceScale: { borderColor: "#2a2a4a" },
+    crosshair: { mode: 1 },
+    autoSize: true,
+  });
+  const series = c.addCandlestickSeries({
+    upColor: "#00d68f",
+    downColor: "#ff4d6d",
+    borderUpColor: "#00d68f",
+    borderDownColor: "#ff4d6d",
+    wickUpColor: "#00d68f",
+    wickDownColor: "#ff4d6d",
+  });
+  charts[venueKey] = { chart: c, series, candles: [], lastCandle: null, candleSec: 60 };
+  return charts[venueKey];
+}
+
+function updateLiveCandle(venueKey, price) {
+  const ch = charts[venueKey];
+  if (!ch || !ch.series) return;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const bucket = Math.floor(nowSec / ch.candleSec) * ch.candleSec;
+  if (!ch.lastCandle || ch.lastCandle.time !== bucket) {
+    ch.lastCandle = { time: bucket, open: price, high: price, low: price, close: price };
+  } else {
+    ch.lastCandle.close = price;
+    if (price > ch.lastCandle.high) ch.lastCandle.high = price;
+    if (price < ch.lastCandle.low)  ch.lastCandle.low  = price;
+  }
+  ch.series.update(ch.lastCandle);
+}
+
+function seedCandles(venueKey, candles, candleSec = 60) {
+  const ch = charts[venueKey];
+  if (!ch || !candles?.length) return;
+  ch.candleSec = candleSec;
+  ch.series.setData(candles);
+  ch.lastCandle = { ...candles[candles.length - 1] };
+  ch.chart.timeScale().fitContent();
+}
+
+// ─── Initialise charts after Lightweight Charts loads ───
+window.addEventListener("DOMContentLoaded", () => {
+  if (!window.LightweightCharts) {
+    console.warn("Lightweight Charts failed to load");
+    return;
+  }
+  makeChart("chart-binance",  "binance");
+  makeChart("chart-tradexyz", "tradexyz");
+  makeChart("chart-ventuals", "ventuals");
+  makeChart("chart-lighter",  "lighter");
+  loadAllCandles();
+});
+
+// ─── Candle loaders (per venue) ───
+async function loadBinanceCandles() {
+  try {
+    const r = await fetch("https://fapi.binance.com/fapi/v1/klines?symbol=SPCXUSDT&interval=1m&limit=300");
+    const k = await r.json();
+    const candles = k.map(row => ({
+      time: Math.floor(row[0] / 1000),
+      open:  parseFloat(row[1]),
+      high:  parseFloat(row[2]),
+      low:   parseFloat(row[3]),
+      close: parseFloat(row[4]),
+    }));
+    seedCandles("binance", candles, 60);
+  } catch (e) { console.warn("binance candles", e); }
+}
+
+async function loadHLCandles(dex, coin, venueKey) {
+  try {
+    const end   = Date.now();
+    const start = end - 1000 * 60 * 60 * 6; // last 6h
+    const r = await fetch("https://api.hyperliquid.xyz/info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "candleSnapshot",
+        req:  { coin: `${dex}:${coin}`, interval: "1m", startTime: start, endTime: end },
+      }),
+    });
+    const k = await r.json();
+    const candles = (Array.isArray(k) ? k : []).map(c => ({
+      time: Math.floor(c.t / 1000),
+      open:  parseFloat(c.o),
+      high:  parseFloat(c.h),
+      low:   parseFloat(c.l),
+      close: parseFloat(c.c),
+    })).filter(c => !isNaN(c.open));
+    seedCandles(venueKey, candles, 60);
+  } catch (e) { console.warn(`HL candles ${dex}:${coin}`, e); }
+}
+
+async function loadLighterCandles() {
+  try {
+    const end   = Math.floor(Date.now() / 1000);
+    const start = end - 60 * 60 * 6;
+    const url = `https://mainnet.zklighter.elliot.ai/api/v1/candlesticks?market_id=173&resolution=1m&start_timestamp=${start}&end_timestamp=${end}&count_back=300`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const arr = j.candlesticks || j.candles || j.data || [];
+    const candles = arr.map(c => ({
+      time:  Math.floor((c.timestamp || c.t || c.time) / (String(c.timestamp || c.t || c.time).length > 11 ? 1000 : 1)),
+      open:  parseFloat(c.open  ?? c.o),
+      high:  parseFloat(c.high  ?? c.h),
+      low:   parseFloat(c.low   ?? c.l),
+      close: parseFloat(c.close ?? c.c),
+    })).filter(c => !isNaN(c.open));
+    seedCandles("lighter", candles, 60);
+  } catch (e) { console.warn("lighter candles", e); }
+}
+
+function loadAllCandles() {
+  loadBinanceCandles();
+  loadHLCandles("xyz",  "SPCX",   "tradexyz");
+  loadHLCandles("vntl", "SPACEX", "ventuals");
+  loadLighterCandles();
+}
+
+// refresh candles every 2 min so history stays fresh
+setInterval(loadAllCandles, 2 * 60 * 1000);
 
 const venues = {
   binance:  { history: [], prev: null, lastPrice: null, live: false, scale: 1 },
@@ -567,6 +680,9 @@ function updatePrice(venue, price, extra = {}) {
     headEl.textContent = fmtUSD(price);
     if (prevPrice != null && prevPrice !== price) flash(headEl, price - prevPrice);
   }
+
+  // Update the live candle on the venue's chart
+  updateLiveCandle(venue, price);
 
   const chgEl = document.getElementById("change-" + venue);
   const chg = price - v.prev;
