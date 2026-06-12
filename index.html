@@ -74,6 +74,36 @@ h1 {
 .market-clock { font-family: "SF Mono", monospace; font-size: 11px; color: var(--accent); }
 
 .stream-row { margin-bottom: 16px; }
+.row-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.row-toolbar .label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+}
+.toggle-btn {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.toggle-btn:hover { background: var(--card2); border-color: var(--accent); color: var(--accent); }
+.collapsible.hidden { display: none; }
 .stream-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -84,6 +114,20 @@ h1 {
   max-height: 360px;
 }
 .stream-card iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+/* TradFi reference (NASDAQ) chart row */
+.tradfi-row { margin-bottom: 16px; }
+.tradfi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 360px;
+  position: relative;
+}
+.tradfi-card iframe {
+  width: 100%; height: 100%; border: 0; display: block;
+}
 .stream-card .live-badge {
   position: absolute;
   top: 12px;
@@ -268,14 +312,35 @@ h1 {
 </div>
 
 <div class="stream-row">
-  <div class="stream-card" id="stream-card">
-    <div class="live-badge">Live</div>
+  <div class="row-toolbar">
+    <span class="label"><span class="dot live"></span>YouTube Live Stream</span>
+    <button class="toggle-btn" id="yt-toggle" onclick="toggleStream()">Hide stream ▴</button>
+  </div>
+  <div class="collapsible" id="stream-collapsible">
+    <div class="stream-card" id="stream-card">
+      <div class="live-badge">Live</div>
+      <iframe
+        id="yt-frame"
+        src="https://www.youtube-nocookie.com/embed/KKvEQ6vCnOQ?autoplay=1&mute=1&playsinline=1&rel=0"
+        title="SpaceX live stream"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="tradfi-row">
+  <div class="row-toolbar">
+    <span class="label">TradFi Reference — Nasdaq</span>
+    <span style="font-family:'SF Mono',monospace;font-size:10px;color:var(--accent);">
+      Compare % moves to perp prices below
+    </span>
+  </div>
+  <div class="tradfi-card">
     <iframe
-      id="yt-frame"
-      src="https://www.youtube-nocookie.com/embed/KKvEQ6vCnOQ?autoplay=1&mute=1&playsinline=1&rel=0"
-      title="SpaceX live stream"
-      referrerpolicy="strict-origin-when-cross-origin"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      src="https://www.tradingview.com/widgetembed/?symbol=NASDAQ%3ANDX&interval=5&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&hideideas=1&theme=dark&style=1&timezone=Etc%2FUTC&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en"
+      allowtransparency="true"
       allowfullscreen></iframe>
   </div>
 </div>
@@ -382,6 +447,30 @@ h1 {
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script>
+// ============================================================
+//   YouTube stream toggle (persisted in localStorage)
+// ============================================================
+function toggleStream() {
+  const wrap = document.getElementById("stream-collapsible");
+  const btn  = document.getElementById("yt-toggle");
+  const iframe = document.getElementById("yt-frame");
+  const isHidden = wrap.classList.toggle("hidden");
+  btn.textContent = isHidden ? "Show stream ▾" : "Hide stream ▴";
+  // Pause the video by clearing src when hidden, restore when shown (saves bandwidth)
+  if (isHidden) {
+    iframe.dataset.src = iframe.src;
+    iframe.src = "about:blank";
+  } else if (iframe.dataset.src) {
+    iframe.src = iframe.dataset.src;
+  }
+  try { localStorage.setItem("yt-hidden", isHidden ? "1" : "0"); } catch (e) {}
+}
+window.addEventListener("DOMContentLoaded", () => {
+  try {
+    if (localStorage.getItem("yt-hidden") === "1") toggleStream();
+  } catch (e) {}
+});
+
 // ============================================================
 //   Helpers
 // ============================================================
