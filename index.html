@@ -355,19 +355,17 @@ h1 {
 
 <div class="tradfi-row">
   <div class="row-toolbar">
-    <span class="label">TradFi Reference — Nasdaq</span>
+    <span class="label">TradFi Reference</span>
     <span style="font-family:'SF Mono',monospace;font-size:10px;color:var(--muted);">
-      <button class="toggle-btn" onclick="setTradFiSymbol('NASDAQ:QQQ', this)" data-active="true">QQQ ETF</button>
-      <button class="toggle-btn" onclick="setTradFiSymbol('NASDAQ:IXIC', this)">Nasdaq Composite</button>
-      <button class="toggle-btn" onclick="setTradFiSymbol('TVC:NDX', this)">NDX (Nasdaq 100)</button>
-      <button class="toggle-btn" onclick="setTradFiSymbol('AMEX:SPY', this)">S&amp;P 500 (SPY)</button>
+      <button class="toggle-btn tradfi-sym" data-symbol="NASDAQ:QQQ"  data-active="true" onclick="setTradFiSymbol('NASDAQ:QQQ', this)">QQQ ETF</button>
+      <button class="toggle-btn tradfi-sym" data-symbol="NASDAQ:IXIC" onclick="setTradFiSymbol('NASDAQ:IXIC', this)">Nasdaq Composite</button>
+      <button class="toggle-btn tradfi-sym" data-symbol="AMEX:SPY"    onclick="setTradFiSymbol('AMEX:SPY', this)">S&amp;P 500 (SPY)</button>
+      <button class="toggle-btn tradfi-sym" data-symbol="NASDAQ:AAPL" onclick="setTradFiSymbol('NASDAQ:AAPL', this)">AAPL</button>
+      <button class="toggle-btn tradfi-sym" data-symbol="NASDAQ:NVDA" onclick="setTradFiSymbol('NASDAQ:NVDA', this)">NVDA</button>
     </span>
   </div>
   <div class="tradfi-card">
-    <iframe id="tradfi-frame"
-      src="https://s.tradingview.com/widgetembed/?symbol=NASDAQ%3AQQQ&interval=5&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&hideideas=1&theme=dark&style=1&timezone=Etc%2FUTC&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en"
-      allowtransparency="true"
-      allowfullscreen></iframe>
+    <div id="tradfi-chart" style="height:100%;width:100%;"></div>
   </div>
 </div>
 
@@ -480,32 +478,54 @@ h1 {
 </div>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="https://s3.tradingview.com/tv.js"></script>
 <script>
 // ============================================================
-//   TradFi reference chart — symbol switcher
+//   TradFi reference chart — TradingView JS widget
+//   (uses tv.js, more permissive than the iframe widget for free symbols)
 // ============================================================
+let tvWidget = null;
 function setTradFiSymbol(symbol, btn) {
-  const frame = document.getElementById("tradfi-frame");
-  if (!frame) return;
-  const encoded = encodeURIComponent(symbol);
-  frame.src = `https://s.tradingview.com/widgetembed/?symbol=${encoded}&interval=5&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&hideideas=1&theme=dark&style=1&timezone=Etc%2FUTC&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en`;
-  document.querySelectorAll("button.toggle-btn[data-active]").forEach(b => b.removeAttribute("data-active"));
-  document.querySelectorAll("button.toggle-btn").forEach(b => {
-    if (b !== btn) b.style.background = "var(--card)";
-    else { b.dataset.active = "true"; b.style.background = "var(--card2)"; }
+  const container = document.getElementById("tradfi-chart");
+  if (!container || !window.TradingView) return;
+  container.innerHTML = "";
+  tvWidget = new TradingView.widget({
+    autosize: true,
+    symbol: symbol,
+    interval: "5",
+    timezone: "Etc/UTC",
+    theme: "dark",
+    style: "1",
+    locale: "en",
+    enable_publishing: false,
+    allow_symbol_change: true,
+    hide_top_toolbar: false,
+    hide_legend: false,
+    hideideas: true,
+    container_id: "tradfi-chart",
+    backgroundColor: "rgba(22, 22, 42, 1)",
+  });
+  document.querySelectorAll("button.tradfi-sym").forEach(b => {
+    if (b === btn) { b.dataset.active = "true"; b.style.background = "var(--card2)"; b.style.color = "var(--accent)"; }
+    else { b.removeAttribute("data-active"); b.style.background = "var(--card)"; b.style.color = "var(--text)"; }
   });
   try { localStorage.setItem("tradfi-symbol", symbol); } catch (e) {}
 }
-window.addEventListener("DOMContentLoaded", () => {
+function initTradFi() {
+  if (!window.TradingView) {
+    setTimeout(initTradFi, 200);
+    return;
+  }
+  let symbol = "NASDAQ:QQQ";
   try {
     const saved = localStorage.getItem("tradfi-symbol");
-    if (saved) {
-      const btn = Array.from(document.querySelectorAll("button.toggle-btn"))
-        .find(b => b.getAttribute("onclick")?.includes(`'${saved}'`));
-      if (btn) setTradFiSymbol(saved, btn);
-    }
+    if (saved) symbol = saved;
   } catch (e) {}
-});
+  const btn = document.querySelector(`button.tradfi-sym[data-symbol="${symbol}"]`)
+           || document.querySelector("button.tradfi-sym");
+  setTradFiSymbol(symbol, btn);
+}
+window.addEventListener("DOMContentLoaded", initTradFi);
 
 // ============================================================
 //   YouTube stream toggle (persisted in localStorage)
