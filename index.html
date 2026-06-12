@@ -190,6 +190,24 @@ h1 {
   padding: 2px 7px;
   border-radius: 4px;
 }
+.chart-head .convention {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.chart-head .convention.share {
+  background: rgba(0, 214, 143, 0.12);
+  color: var(--green);
+  border: 1px solid rgba(0, 214, 143, 0.3);
+}
+.chart-head .convention.mcap {
+  background: rgba(255, 200, 87, 0.12);
+  color: var(--gold);
+  border: 1px solid rgba(255, 200, 87, 0.3);
+}
 .chart-head .right { display: flex; gap: 14px; align-items: baseline; }
 .chart-head .live-price {
   font-size: 18px;
@@ -305,9 +323,14 @@ h1 {
 </div>
 
 <div class="summary-strip">
-  <div>Highest: <strong id="hi">—</strong></div>
-  <div>Lowest: <strong id="lo">—</strong></div>
-  <div>Spread: <strong id="spread">—</strong></div>
+  <div>$/share <span style="color:var(--green);">●</span> spread:
+    <strong id="spreadShare">—</strong>
+    <span style="color:var(--muted);">(<span id="rangeShare">—</span>)</span>
+  </div>
+  <div>Mkt Cap <span style="color:var(--gold);">●</span> spread:
+    <strong id="spreadMcap">—</strong>
+    <span style="color:var(--muted);">(<span id="rangeMcap">—</span>)</span>
+  </div>
   <div>NYSE open in: <strong id="nyseOpen">—</strong></div>
 </div>
 
@@ -348,11 +371,12 @@ h1 {
 <div class="chart-grid">
 
   <!-- Binance -->
-  <div class="chart-card">
+  <div class="chart-card" data-convention="share">
     <div class="chart-head">
       <div class="left">
         <span class="venue">Binance</span>
         <span class="market">SPCXUSDT</span>
+        <span class="convention share" title="Quoted as price per synthetic share">$/share</span>
       </div>
       <div class="right">
         <span class="d24" id="d24-binance">—</span>
@@ -371,11 +395,12 @@ h1 {
   </div>
 
   <!-- trade.xyz -->
-  <div class="chart-card">
+  <div class="chart-card" data-convention="share">
     <div class="chart-head">
       <div class="left">
         <span class="venue">trade.xyz</span>
         <span class="market">xyz:SPCX</span>
+        <span class="convention share" title="Quoted as price per synthetic share">$/share</span>
       </div>
       <div class="right">
         <span class="d24" id="d24-tradexyz">—</span>
@@ -394,11 +419,12 @@ h1 {
   </div>
 
   <!-- Ventuals -->
-  <div class="chart-card">
+  <div class="chart-card" data-convention="mcap">
     <div class="chart-head">
       <div class="left">
         <span class="venue">Ventuals</span>
         <span class="market">vntl:SPACEX</span>
+        <span class="convention mcap" title="Quoted as implied market capitalization, not per-share price">Mkt Cap</span>
       </div>
       <div class="right">
         <span class="d24" id="d24-ventuals">—</span>
@@ -408,7 +434,7 @@ h1 {
     <div class="chart-body">
       <div class="chart-frame-wrap"><div class="tv-chart" id="chart-ventuals"></div></div>
       <div class="ob-wrap">
-        <div class="ob-header"><span>Price (USDC)</span><span>Size</span></div>
+        <div class="ob-header"><span>Mkt Cap ($)</span><span>Size</span></div>
         <div class="ob-section asks" id="ob-asks-ventuals"></div>
         <div class="ob-spread" id="ob-spread-ventuals">—</div>
         <div class="ob-section bids" id="ob-bids-ventuals"></div>
@@ -417,11 +443,12 @@ h1 {
   </div>
 
   <!-- Lighter -->
-  <div class="chart-card">
+  <div class="chart-card" data-convention="mcap">
     <div class="chart-head">
       <div class="left">
         <span class="venue">Lighter</span>
         <span class="market">SPACEX (id 173)</span>
+        <span class="convention mcap" title="Quoted as implied market capitalization, not per-share price">Mkt Cap</span>
       </div>
       <div class="right">
         <span class="d24" id="d24-lighter">—</span>
@@ -431,7 +458,7 @@ h1 {
     <div class="chart-body">
       <div class="chart-frame-wrap"><div class="tv-chart" id="chart-lighter"></div></div>
       <div class="ob-wrap">
-        <div class="ob-header"><span>Price (USDC)</span><span>Size</span></div>
+        <div class="ob-header"><span>Mkt Cap ($)</span><span>Size</span></div>
         <div class="ob-section asks" id="ob-asks-lighter"></div>
         <div class="ob-spread" id="ob-spread-lighter">—</div>
         <div class="ob-section bids" id="ob-bids-lighter"></div>
@@ -442,7 +469,11 @@ h1 {
 </div>
 
 <div class="note">
-  Charts rendered with Lightweight Charts using each venue's native candle endpoint. Volume bars at bottom of each chart. Order book is top-10 levels on each side, updated via WebSocket (Binance: <code>@depth10@100ms</code>; HL: <code>l2Book</code>; Lighter: <code>order_book/173</code>). Compare % moves rather than absolute prices — venues reference different share-class assumptions.
+  <strong style="color:var(--gold);">Quote conventions differ across venues:</strong>
+  <span style="color:var(--green);">●</span> <strong>Binance + trade.xyz</strong> quote synthetic <strong>$/share</strong> (~$170 region).
+  <span style="color:var(--gold);">●</span> <strong>Ventuals + Lighter</strong> quote <strong>implied market capitalization</strong> in dollars (~$2.2k region, i.e. $2.2B / $2.2T scale depending on venue's unit).
+  This is why the absolute prices look 13× apart — they're tracking the same underlying just in different units. Compare <strong>% moves</strong> within each convention group, and use the NASDAQ chart above as a TradFi reference.<br><br>
+  Charts via Lightweight Charts using each venue's native candle endpoint. Volume bars at bottom of each chart. Order book top-10 each side over WebSocket (Binance <code>@depth10@100ms</code>, HL <code>l2Book</code>, Lighter <code>order_book/173</code>).
 </div>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
@@ -475,10 +506,10 @@ window.addEventListener("DOMContentLoaded", () => {
 //   Helpers
 // ============================================================
 const venues = {
-  binance:  { lastPrice: null, prev: null, live: false, candleSec: 60 },
-  tradexyz: { lastPrice: null, prev: null, live: false, candleSec: 60 },
-  ventuals: { lastPrice: null, prev: null, live: false, candleSec: 60 },
-  lighter:  { lastPrice: null, prev: null, live: false, candleSec: 60 },
+  binance:  { lastPrice: null, prev: null, live: false, candleSec: 60, convention: "share" },
+  tradexyz: { lastPrice: null, prev: null, live: false, candleSec: 60, convention: "share" },
+  ventuals: { lastPrice: null, prev: null, live: false, candleSec: 60, convention: "mcap"  },
+  lighter:  { lastPrice: null, prev: null, live: false, candleSec: 60, convention: "mcap"  },
 };
 const charts = {};
 
@@ -642,14 +673,26 @@ function updatePrice(venue, price, extras = {}) {
 }
 
 function updateSummary() {
-  const prices = Object.values(venues).filter(v => v.lastPrice != null).map(v => v.lastPrice);
-  if (prices.length < 2) return;
-  const hi = Math.max(...prices);
-  const lo = Math.min(...prices);
-  document.getElementById("hi").textContent = fmtUSD(hi);
-  document.getElementById("lo").textContent = fmtUSD(lo);
-  document.getElementById("spread").textContent =
-    fmtUSD(hi - lo) + " (" + ((hi - lo) / lo * 100).toFixed(1) + "%)";
+  const group = (conv) =>
+    Object.values(venues).filter(v => v.convention === conv && v.lastPrice != null).map(v => v.lastPrice);
+
+  const renderGroup = (prices, spreadId, rangeId) => {
+    const spreadEl = document.getElementById(spreadId);
+    const rangeEl  = document.getElementById(rangeId);
+    if (!prices.length) { spreadEl.textContent = "—"; rangeEl.textContent = "—"; return; }
+    const hi = Math.max(...prices);
+    const lo = Math.min(...prices);
+    if (prices.length < 2) {
+      spreadEl.textContent = "—";
+      rangeEl.textContent = fmtUSD(hi);
+      return;
+    }
+    spreadEl.textContent = fmtUSD(hi - lo) + " (" + ((hi - lo) / lo * 100).toFixed(2) + "%)";
+    rangeEl.textContent = fmtUSD(lo) + " → " + fmtUSD(hi);
+  };
+
+  renderGroup(group("share"), "spreadShare", "rangeShare");
+  renderGroup(group("mcap"),  "spreadMcap",  "rangeMcap");
 }
 
 // ============================================================
