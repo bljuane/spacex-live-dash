@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SpaceX Pre-IPO — Multi-Venue Live</title>
+<style>
+:root {
+  --bg: #0a0a14;
+  --card: #16162a;
+  --card2: #1c1c33;
+  --border: #2a2a4a;
+  --text: #e8e8f5;
+  --muted: #8888aa;
+  --green: #00d68f;
+  --red: #ff4d6d;
+  --gold: #ffc857;
+  --accent: #3aa5ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: -0.5px;
+}
+.header-meta {
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+.dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  margin-right: 6px;
+  transition: background 0.3s;
+}
+.dot.live { background: var(--green); animation: pulse 2s infinite; }
+.dot.dead { background: var(--red); }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 16px;
+}
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+@media (max-width: 1100px) {
+  .chart-grid { grid-template-columns: 1fr; }
+}
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 440px;
+  position: relative;
+}
+.chart-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.2);
+}
+.chart-head .left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.chart-head .venue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.chart-head .market {
+  font-size: 10px;
+}
+.chart-head .live-price {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.chart-head .live-price.flash-up { color: var(--green); transition: color 0.1s; }
+.chart-head .live-price.flash-down { color: var(--red); transition: color 0.1s; }
+.chart-frame-wrap {
+  flex: 1;
+  position: relative;
+  background: var(--card2);
+  min-height: 380px;
+}
+.chart-frame-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.chart-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 20px;
+  z-index: 0;
+  pointer-events: none;
+}
+.chart-fallback strong { color: var(--gold); font-size: 14px; margin-bottom: 8px; }
+.chart-fallback a { color: var(--accent); text-decoration: none; margin-top: 12px; pointer-events: auto; }
+.chart-fallback a:hover { text-decoration: underline; }
+.stream-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+@media (max-width: 1100px) {
+  .stream-row { grid-template-columns: 1fr; }
+}
+.stream-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  min-height: 380px;
+}
+.stream-card iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.stream-card .live-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  background: rgba(255, 77, 109, 0.92);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+.stream-card .live-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pulse 1.5s infinite;
+}
+.side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.side-stack .card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.venue {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+}
+.market {
+  font-family: "SF Mono", monospace;
+  font-size: 10px;
+  color: var(--accent);
+  background: rgba(58, 165, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.price {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin: 8px 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+.price.flash-up { color: var(--green); transition: color 0.1s; }
+.price.flash-down { color: var(--red); transition: color 0.1s; }
+.change {
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.change.up { color: var(--green); }
+.change.down { color: var(--red); }
+.change.flat { color: var(--muted); }
+.spark {
+  width: 100%;
+  height: 80px;
+  margin-top: 12px;
+  background: var(--card2);
+  border-radius: 6px;
+}
+.meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.meta div { display: flex; justify-content: space-between; }
+.meta strong {
+  color: var(--text);
+  font-weight: 500;
+}
+.summary-strip {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+.summary-strip strong { color: var(--text); font-variant-numeric: tabular-nums; }
+.note {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(255, 200, 87, 0.05);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.market-clock {
+  font-family: "SF Mono", monospace;
+  font-size: 11px;
+  color: var(--accent);
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🚀 SpaceX Pre-IPO — Live Across Venues</h1>
+  <div class="header-meta">
+    <span class="market-clock" id="clock">--:--:-- UTC</span>
+    <span><span class="dot live"></span><span id="connCount">0</span>/4 venues live</span>
+  </div>
+</div>
+
+<div class="summary-strip" id="summary">
+  <div>Highest: <strong id="hi">—</strong></div>
+  <div>Lowest: <strong id="lo">—</strong></div>
+  <div>Spread: <strong id="spread">—</strong></div>
+  <div>NYSE open in: <strong id="nyseOpen">—</strong></div>
+</div>
+
+<div class="stream-row">
+  <div class="stream-card" id="stream-card">
+    <div class="live-badge">Live</div>
+    <iframe
+      id="yt-frame"
+      src="https://www.youtube-nocookie.com/embed/KKvEQ6vCnOQ?autoplay=1&mute=1&playsinline=1&rel=0"
+      title="SpaceX live stream"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen></iframe>
+    <div id="yt-fallback" style="display:none;position:absolute;inset:0;background:rgba(10,10,20,0.95);
+                                  color:var(--text);padding:24px;font-size:13px;line-height:1.6;
+                                  display:flex;flex-direction:column;justify-content:center;align-items:center;
+                                  text-align:center;gap:12px;">
+      <div style="font-size:16px;font-weight:600;color:var(--gold);">YouTube embed blocked from <code>file://</code></div>
+      <div style="color:var(--muted);max-width:480px;">
+        Many live streams refuse to embed when the page is opened directly from disk (no origin header).
+        Run a tiny local server so the page loads from <code>http://localhost</code>:
+      </div>
+      <pre style="background:var(--card2);padding:10px 14px;border-radius:6px;color:var(--accent);
+                   font-family:'SF Mono',monospace;font-size:12px;text-align:left;">cd "/Users/benruane/Claude Code/SEDA Feeds"
+python3 -m http.server 8000
+# then open http://localhost:8000/SPACEX_Live_Dashboard.html</pre>
+      <a href="https://www.youtube.com/watch?v=KKvEQ6vCnOQ" target="_blank"
+         style="color:var(--accent);text-decoration:none;border:1px solid var(--accent);
+                padding:8px 18px;border-radius:6px;margin-top:4px;">↗ Watch on YouTube instead</a>
+    </div>
+  </div>
+  <div class="side-stack">
+    <div class="card" data-venue="binance">
+      <div class="card-head">
+        <span class="venue">Binance</span>
+        <span class="market">SPCXUSDT (perp)</span>
+      </div>
+      <div class="price" id="price-binance-side">—</div>
+      <div class="change" id="change-binance-side">awaiting first tick…</div>
+    </div>
+    <div class="card" data-venue="tradexyz">
+      <div class="card-head">
+        <span class="venue">trade.xyz</span>
+        <span class="market">xyz:SPCX (HIP-3)</span>
+      </div>
+      <div class="price" id="price-tradexyz-side">—</div>
+      <div class="change" id="change-tradexyz-side">awaiting first tick…</div>
+    </div>
+  </div>
+</div>
+
+<div class="chart-grid">
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="left">
+        <span class="venue">Binance</span>
+        <span class="market">BINANCE:SPCXUSDT</span>
+      </div>
+      <div class="live-price" id="livehead-binance">—</div>
+    </div>
+    <div class="chart-frame-wrap">
+      <div class="chart-fallback"><strong>Loading TradingView…</strong><span>BINANCE:SPCXUSDT</span></div>
+      <iframe
+        src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ASPCXUSDT&interval=5&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&hideideas=1&theme=dark&style=1&timezone=Etc/UTC&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en"
+        allowtransparency="true" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="left">
+        <span class="venue">trade.xyz</span>
+        <span class="market">xyz:SPCX</span>
+      </div>
+      <div class="live-price" id="livehead-tradexyz">—</div>
+    </div>
+    <div class="chart-frame-wrap">
+      <div class="chart-fallback">
+        <strong>Embed blocked by trade.xyz</strong>
+        <span>Their app sets X-Frame-Options to prevent embedding.<br>Live price + sparkline shown in card below.</span>
+        <a href="https://app.trade.xyz/?market=SPCX" target="_blank">↗ Open chart on trade.xyz</a>
+      </div>
+      <iframe src="https://app.trade.xyz/?market=SPCX" referrerpolicy="no-referrer"></iframe>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="left">
+        <span class="venue">Ventuals</span>
+        <span class="market">vntl:SPACEX</span>
+      </div>
+      <div class="live-price" id="livehead-ventuals">—</div>
+    </div>
+    <div class="chart-frame-wrap">
+      <div class="chart-fallback">
+        <strong>Embed blocked by Ventuals</strong>
+        <span>Their app sets X-Frame-Options to prevent embedding.<br>Live price + sparkline shown in card below.</span>
+        <a href="https://app.ventuals.com/perp/SPACEX" target="_blank">↗ Open chart on Ventuals</a>
+      </div>
+      <iframe src="https://app.ventuals.com/perp/SPACEX" referrerpolicy="no-referrer"></iframe>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="left">
+        <span class="venue">Lighter</span>
+        <span class="market">SPACEX</span>
+      </div>
+      <div class="live-price" id="livehead-lighter">—</div>
+    </div>
+    <div class="chart-frame-wrap">
+      <div class="chart-fallback">
+        <strong>Embed blocked by Lighter</strong>
+        <span>Their app sets X-Frame-Options to prevent embedding.<br>Live price + sparkline shown in card below.</span>
+        <a href="https://app.lighter.xyz/trade/SPACEX" target="_blank">↗ Open chart on Lighter</a>
+      </div>
+      <iframe src="https://app.lighter.xyz/trade/SPACEX" referrerpolicy="no-referrer"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="grid" id="grid">
+  <div class="card" data-venue="binance">
+    <div class="card-head">
+      <span class="venue">Binance</span>
+      <span class="market">SPCXUSDT (perp)</span>
+    </div>
+    <div class="price" id="price-binance">—</div>
+    <div class="change" id="change-binance">awaiting first tick…</div>
+    <canvas class="spark" data-venue="binance"></canvas>
+    <div class="meta">
+      <div>24h change <strong id="d24-binance">—</strong></div>
+      <div>Best bid <strong id="bid-binance">—</strong></div>
+      <div>Last update <strong id="ts-binance">—</strong></div>
+      <div>Best ask <strong id="ask-binance">—</strong></div>
+    </div>
+  </div>
+
+  <div class="card" data-venue="tradexyz">
+    <div class="card-head">
+      <span class="venue">trade.xyz</span>
+      <span class="market">xyz:SPCX (HIP-3)</span>
+    </div>
+    <div class="price" id="price-tradexyz">—</div>
+    <div class="change" id="change-tradexyz">awaiting first tick…</div>
+    <canvas class="spark" data-venue="tradexyz"></canvas>
+    <div class="meta">
+      <div>24h change <strong id="d24-tradexyz">—</strong></div>
+      <div>Mark <strong id="bid-tradexyz">—</strong></div>
+      <div>Last update <strong id="ts-tradexyz">—</strong></div>
+      <div>Oracle <strong id="ask-tradexyz">—</strong></div>
+    </div>
+  </div>
+
+  <div class="card" data-venue="ventuals">
+    <div class="card-head">
+      <span class="venue">Ventuals</span>
+      <span class="market">vntl:SPACEX (HIP-3)</span>
+    </div>
+    <div class="price" id="price-ventuals">—</div>
+    <div class="change" id="change-ventuals">awaiting first tick…</div>
+    <canvas class="spark" data-venue="ventuals"></canvas>
+    <div class="meta">
+      <div>24h change <strong id="d24-ventuals">—</strong></div>
+      <div>Mark <strong id="bid-ventuals">—</strong></div>
+      <div>Last update <strong id="ts-ventuals">—</strong></div>
+      <div>Oracle <strong id="ask-ventuals">—</strong></div>
+    </div>
+  </div>
+
+  <div class="card" data-venue="lighter">
+    <div class="card-head">
+      <span class="venue">Lighter</span>
+      <span class="market">SPACEX (mid 173)</span>
+    </div>
+    <div class="price" id="price-lighter">—</div>
+    <div class="change" id="change-lighter">awaiting first tick…</div>
+    <canvas class="spark" data-venue="lighter"></canvas>
+    <div class="meta">
+      <div>24h change <strong id="d24-lighter">—</strong></div>
+      <div>Bid <strong id="bid-lighter">—</strong></div>
+      <div>Last update <strong id="ts-lighter">—</strong></div>
+      <div>Ask <strong id="ask-lighter">—</strong></div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>Note on price disparity:</strong> SpaceX pre-IPO synthetic perps reference different share-class / valuation assumptions on each venue, so absolute prices can vary by 10×+ across venues. trade.xyz and Binance typically use one convention while Lighter's <code>SPACEX</code> uses a higher per-unit base (often the "full-share" equivalent). Compare <strong>% moves</strong>, not absolute prices.<br><br>
+  <strong>About the "transition to live stock":</strong> SpaceX isn't publicly listed yet — these are all synthetic pre-IPO perps. When NYSE opens, perp prices will tighten as TradFi-aware traders re-balance, but the underlying remains private until an actual IPO.<br><br>
+  <strong>Data sources:</strong> Binance USDM Futures WS · Hyperliquid WS (xyz + vntl dexes via <code>activeAssetCtx</code>) · Lighter WS (market_stats channel)
+</div>
+
+<script>
+// ============================================================
+//   SpaceX multi-venue live dashboard
+// ============================================================
+
+const venues = {
+  binance:  { history: [], prev: null, lastPrice: null, live: false, scale: 1 },
+  tradexyz: { history: [], prev: null, lastPrice: null, live: false, scale: 1 },
+  ventuals: { history: [], prev: null, lastPrice: null, live: false, scale: 1 },
+  lighter:  { history: [], prev: null, lastPrice: null, live: false, scale: 1 },
+};
+
+const MAX_POINTS = 300;
+const fmtUSD = (n) => n == null ? "—" :
+  "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtPct = (a, b) => {
+  if (a == null || b == null || b === 0) return "—";
+  const p = ((a - b) / b) * 100;
+  const sign = p >= 0 ? "+" : "";
+  return sign + p.toFixed(2) + "%";
+};
+const now = () => new Date().toISOString().slice(11, 19);
+
+function flash(el, dir) {
+  el.classList.remove("flash-up", "flash-down");
+  void el.offsetWidth;
+  el.classList.add(dir > 0 ? "flash-up" : "flash-down");
+  setTimeout(() => el.classList.remove("flash-up", "flash-down"), 300);
+}
+
+function updatePrice(venue, price, extra = {}) {
+  if (price == null || isNaN(price)) return;
+  const v = venues[venue];
+  const prevPrice = v.lastPrice;
+  v.lastPrice = price;
+  v.history.push({ t: Date.now(), p: price });
+  if (v.history.length > MAX_POINTS) v.history.shift();
+  if (v.prev == null) v.prev = price;
+
+  const priceEl = document.getElementById("price-" + venue);
+  priceEl.textContent = fmtUSD(price);
+  if (prevPrice != null && prevPrice !== price) flash(priceEl, price - prevPrice);
+
+  // Mirror to side panel (for binance + tradexyz, shown next to the stream)
+  const sideEl = document.getElementById("price-" + venue + "-side");
+  if (sideEl) {
+    sideEl.textContent = fmtUSD(price);
+    if (prevPrice != null && prevPrice !== price) flash(sideEl, price - prevPrice);
+  }
+
+  // Mirror to chart-card live header
+  const headEl = document.getElementById("livehead-" + venue);
+  if (headEl) {
+    headEl.textContent = fmtUSD(price);
+    if (prevPrice != null && prevPrice !== price) flash(headEl, price - prevPrice);
+  }
+
+  const chgEl = document.getElementById("change-" + venue);
+  const chg = price - v.prev;
+  const chgPct = (chg / v.prev) * 100;
+  chgEl.classList.remove("up", "down", "flat");
+  chgEl.classList.add(chgPct > 0.01 ? "up" : chgPct < -0.01 ? "down" : "flat");
+  const sign = chg >= 0 ? "+" : "";
+  const changeText = `${sign}${fmtUSD(chg).replace("$","")} (${sign}${chgPct.toFixed(2)}%) since open`;
+  chgEl.textContent = changeText;
+  const sideChgEl = document.getElementById("change-" + venue + "-side");
+  if (sideChgEl) {
+    sideChgEl.classList.remove("up", "down", "flat");
+    sideChgEl.classList.add(chgPct > 0.01 ? "up" : chgPct < -0.01 ? "down" : "flat");
+    sideChgEl.textContent = changeText;
+  }
+
+  document.getElementById("ts-" + venue).textContent = now();
+  if (extra.bid != null) document.getElementById("bid-" + venue).textContent = fmtUSD(extra.bid);
+  if (extra.ask != null) document.getElementById("ask-" + venue).textContent = fmtUSD(extra.ask);
+  if (extra.d24Pct != null) {
+    const el = document.getElementById("d24-" + venue);
+    el.textContent = (extra.d24Pct >= 0 ? "+" : "") + extra.d24Pct.toFixed(2) + "%";
+    el.style.color = extra.d24Pct > 0 ? "var(--green)" : extra.d24Pct < 0 ? "var(--red)" : "var(--muted)";
+  }
+  drawSpark(venue);
+  updateSummary();
+}
+
+function setLive(venue, live) {
+  venues[venue].live = live;
+  const count = Object.values(venues).filter(v => v.live).length;
+  document.getElementById("connCount").textContent = count;
+}
+
+function drawSpark(venue) {
+  const canvas = document.querySelector(`canvas[data-venue="${venue}"]`);
+  const ctx = canvas.getContext("2d");
+  const data = venues[venue].history;
+  if (data.length < 2) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const prices = data.map(d => d.p);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const range = max - min || 1;
+  const xStep = w / (data.length - 1);
+
+  const first = prices[0];
+  const last = prices[prices.length - 1];
+  const isUp = last >= first;
+  const color = isUp ? "#00d68f" : "#ff4d6d";
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, color + "44");
+  grad.addColorStop(1, color + "00");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(0, h);
+  data.forEach((d, i) => {
+    const x = i * xStep;
+    const y = h - ((d.p - min) / range) * (h - 8) - 4;
+    ctx.lineTo(x, y);
+  });
+  ctx.lineTo(w, h);
+  ctx.closePath();
+  ctx.fill();
+
+  // line
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  data.forEach((d, i) => {
+    const x = i * xStep;
+    const y = h - ((d.p - min) / range) * (h - 8) - 4;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+function updateSummary() {
+  const prices = Object.values(venues).filter(v => v.lastPrice != null).map(v => v.lastPrice);
+  if (prices.length < 2) return;
+  const hi = Math.max(...prices);
+  const lo = Math.min(...prices);
+  document.getElementById("hi").textContent = fmtUSD(hi);
+  document.getElementById("lo").textContent = fmtUSD(lo);
+  document.getElementById("spread").textContent =
+    fmtUSD(hi - lo) + " (" + ((hi - lo) / lo * 100).toFixed(1) + "%)";
+}
+
+// ============================================================
+//   YouTube embed: show fallback hint if loaded from file://
+// ============================================================
+(function() {
+  const fb = document.getElementById("yt-fallback");
+  const frame = document.getElementById("yt-frame");
+  if (window.location.protocol === "file:") {
+    if (fb) fb.style.display = "flex";
+    if (frame) frame.style.display = "none";
+  }
+})();
+
+// ============================================================
+//   NYSE open countdown (9:30 ET = 13:30 or 14:30 UTC depending on DST)
+// ============================================================
+function updateClock() {
+  const d = new Date();
+  document.getElementById("clock").textContent = d.toISOString().slice(11, 19) + " UTC";
+
+  // NYSE open is 9:30 ET. During EDT (Mar-Nov) that's 13:30 UTC; during EST that's 14:30 UTC.
+  // June is EDT → 13:30 UTC.
+  const isEDT = (() => {
+    const m = d.getUTCMonth();
+    return m >= 2 && m <= 10; // rough — DST runs Mar-Nov
+  })();
+  const openHourUTC = isEDT ? 13 : 14;
+  const openMinuteUTC = 30;
+
+  const open = new Date(Date.UTC(
+    d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(),
+    openHourUTC, openMinuteUTC, 0
+  ));
+  let diff = open - d;
+  let label = "until open";
+  if (diff < 0) {
+    // already opened — show how long since open
+    diff = Math.abs(diff);
+    label = "since open";
+  }
+  // weekend check
+  const day = d.getUTCDay();
+  if (day === 0 || day === 6) {
+    document.getElementById("nyseOpen").textContent = "weekend (closed)";
+    return;
+  }
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById("nyseOpen").textContent =
+    `${h}h ${m}m ${s}s ${label}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================================================
+//   BINANCE — SPCXUSDT bookTicker WS
+// ============================================================
+(function connectBinance() {
+  const ws = new WebSocket("wss://fstream.binance.com/ws/spcxusdt@bookTicker");
+  ws.onopen = () => setLive("binance", true);
+  ws.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    const bid = parseFloat(d.b);
+    const ask = parseFloat(d.a);
+    const mid = (bid + ask) / 2;
+    updatePrice("binance", mid, { bid, ask });
+  };
+  ws.onclose = () => { setLive("binance", false); setTimeout(connectBinance, 3000); };
+  ws.onerror = () => ws.close();
+})();
+
+// Also pull 24h stats from Binance every 30s
+async function fetchBinance24h() {
+  try {
+    const r = await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=SPCXUSDT");
+    const j = await r.json();
+    const pct = parseFloat(j.priceChangePercent);
+    if (!isNaN(pct)) {
+      const el = document.getElementById("d24-binance");
+      el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
+      el.style.color = pct > 0 ? "var(--green)" : pct < 0 ? "var(--red)" : "var(--muted)";
+    }
+  } catch (e) {}
+}
+fetchBinance24h();
+setInterval(fetchBinance24h, 30000);
+
+// ============================================================
+//   HYPERLIQUID — xyz:SPCX (trade.xyz) and vntl:SPACEX (Ventuals)
+//   Use activeAssetCtx subscription for full ctx (mid, mark, oracle, funding)
+// ============================================================
+function connectHL(dex, coin, venueKey) {
+  function open() {
+    const ws = new WebSocket("wss://api.hyperliquid.xyz/ws");
+    ws.onopen = () => {
+      setLive(venueKey, true);
+      ws.send(JSON.stringify({
+        method: "subscribe",
+        subscription: { type: "activeAssetCtx", coin: `${dex}:${coin}` }
+      }));
+    };
+    ws.onmessage = (e) => {
+      const m = JSON.parse(e.data);
+      if (m.channel === "activeAssetCtx" && m.data && m.data.ctx) {
+        const ctx = m.data.ctx;
+        const mid = parseFloat(ctx.midPx);
+        const mark = parseFloat(ctx.markPx);
+        const oracle = parseFloat(ctx.oraclePx);
+        if (!isNaN(mid)) {
+          updatePrice(venueKey, mid, { bid: mark, ask: oracle });
+          const prev = parseFloat(ctx.prevDayPx);
+          if (!isNaN(prev) && prev > 0) {
+            const pct = ((mid - prev) / prev) * 100;
+            const el = document.getElementById("d24-" + venueKey);
+            el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
+            el.style.color = pct > 0 ? "var(--green)" : pct < 0 ? "var(--red)" : "var(--muted)";
+          }
+        }
+      }
+    };
+    ws.onclose = () => { setLive(venueKey, false); setTimeout(open, 3000); };
+    ws.onerror = () => ws.close();
+  }
+  open();
+}
+connectHL("xyz",  "SPCX",   "tradexyz");
+connectHL("vntl", "SPACEX", "ventuals");
+
+// ============================================================
+//   LIGHTER — SPACEX (market_id 173) via market_stats channel
+// ============================================================
+(function connectLighter() {
+  const ws = new WebSocket("wss://mainnet.zklighter.elliot.ai/stream");
+  ws.onopen = () => {
+    setLive("lighter", true);
+    ws.send(JSON.stringify({
+      type: "subscribe",
+      channel: "market_stats/173"
+    }));
+    // also subscribe to ticker for the bid/ask
+    ws.send(JSON.stringify({
+      type: "subscribe",
+      channel: "order_book/173"
+    }));
+  };
+  let lastBook = { bid: null, ask: null };
+  ws.onmessage = (e) => {
+    try {
+      const m = JSON.parse(e.data);
+      if (m.type === "update/market_stats" || m.type === "subscribed/market_stats") {
+        const s = m.market_stats || m.stats;
+        if (s) {
+          const last = parseFloat(s.last_trade_price);
+          if (!isNaN(last) && last > 0) {
+            updatePrice("lighter", last, lastBook);
+            const pct = parseFloat(s.daily_price_change);
+            if (!isNaN(pct)) {
+              const el = document.getElementById("d24-lighter");
+              el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
+              el.style.color = pct > 0 ? "var(--green)" : pct < 0 ? "var(--red)" : "var(--muted)";
+            }
+          }
+        }
+      } else if (m.type === "update/order_book" || m.type === "subscribed/order_book") {
+        const ob = m.order_book || m;
+        if (ob && ob.bids && ob.asks) {
+          const bestBid = parseFloat(ob.bids[0]?.price);
+          const bestAsk = parseFloat(ob.asks[0]?.price);
+          if (!isNaN(bestBid)) lastBook.bid = bestBid;
+          if (!isNaN(bestAsk)) lastBook.ask = bestAsk;
+        }
+      }
+    } catch (err) {}
+  };
+  ws.onclose = () => { setLive("lighter", false); setTimeout(connectLighter, 3000); };
+  ws.onerror = () => ws.close();
+})();
+
+// ============================================================
+//   Seed history with one REST poll so charts show something
+//   on page load instead of waiting for first WS tick.
+// ============================================================
+async function seedTradeXyz() {
+  try {
+    const r = await fetch("https://api.hyperliquid.xyz/info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "metaAndAssetCtxs", dex: "xyz" })
+    });
+    const [meta, ctxs] = await r.json();
+    const idx = meta.universe.findIndex(a => a.name === "xyz:SPCX");
+    if (idx >= 0) {
+      const c = ctxs[idx];
+      const mid = parseFloat(c.midPx);
+      if (!isNaN(mid)) updatePrice("tradexyz", mid, { bid: parseFloat(c.markPx), ask: parseFloat(c.oraclePx) });
+    }
+  } catch (e) {}
+}
+async function seedVentuals() {
+  try {
+    const r = await fetch("https://api.hyperliquid.xyz/info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "metaAndAssetCtxs", dex: "vntl" })
+    });
+    const [meta, ctxs] = await r.json();
+    const idx = meta.universe.findIndex(a => a.name === "vntl:SPACEX");
+    if (idx >= 0) {
+      const c = ctxs[idx];
+      const mid = parseFloat(c.midPx);
+      if (!isNaN(mid)) updatePrice("ventuals", mid, { bid: parseFloat(c.markPx), ask: parseFloat(c.oraclePx) });
+    }
+  } catch (e) {}
+}
+async function seedLighter() {
+  try {
+    const r = await fetch("https://mainnet.zklighter.elliot.ai/api/v1/orderBookDetails?market_id=173");
+    const j = await r.json();
+    const m = j.order_book_details?.[0];
+    if (m) {
+      const last = parseFloat(m.last_trade_price);
+      if (!isNaN(last) && last > 0) {
+        updatePrice("lighter", last);
+        const pct = parseFloat(m.daily_price_change);
+        if (!isNaN(pct)) {
+          const el = document.getElementById("d24-lighter");
+          el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
+          el.style.color = pct > 0 ? "var(--green)" : pct < 0 ? "var(--red)" : "var(--muted)";
+        }
+      }
+    }
+  } catch (e) {}
+}
+seedTradeXyz();
+seedVentuals();
+seedLighter();
+</script>
+
+</body>
+</html>
