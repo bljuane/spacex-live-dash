@@ -28,8 +28,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
 }
 h1 {
@@ -54,109 +54,26 @@ h1 {
   transition: background 0.3s;
 }
 .dot.live { background: var(--green); animation: pulse 2s infinite; }
-.dot.dead { background: var(--red); }
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  gap: 16px;
-}
-.chart-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-@media (max-width: 1100px) {
-  .chart-grid { grid-template-columns: 1fr; }
-}
-.chart-card {
+.summary-strip {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-height: 440px;
-  position: relative;
-}
-.chart-head {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(0,0,0,0.2);
-}
-.chart-head .left {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.chart-head .venue {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  text-transform: none;
-  letter-spacing: 0;
-}
-.chart-head .market {
-  font-size: 10px;
-}
-.chart-head .live-price {
-  font-size: 18px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.chart-head .live-price.flash-up { color: var(--green); transition: color 0.1s; }
-.chart-head .live-price.flash-down { color: var(--red); transition: color 0.1s; }
-.chart-frame-wrap {
-  flex: 1;
-  position: relative;
-  background: var(--card2);
-  min-height: 380px;
-}
-.chart-frame-wrap iframe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-}
-.tv-chart {
-  position: absolute;
-  inset: 0;
-}
-.chart-fallback {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  font-size: 12px;
-  text-align: center;
-  padding: 20px;
-  z-index: 0;
-  pointer-events: none;
-}
-.chart-fallback strong { color: var(--gold); font-size: 14px; margin-bottom: 8px; }
-.chart-fallback a { color: var(--accent); text-decoration: none; margin-top: 12px; pointer-events: auto; }
-.chart-fallback a:hover { text-decoration: underline; }
-.stream-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
-  gap: 16px;
+  border-radius: 10px;
+  padding: 10px 16px;
   margin-bottom: 16px;
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
 }
-@media (max-width: 1100px) {
-  .stream-row { grid-template-columns: 1fr; }
-}
+.summary-strip strong { color: var(--text); font-variant-numeric: tabular-nums; }
+.market-clock { font-family: "SF Mono", monospace; font-size: 11px; color: var(--accent); }
+
+.stream-row { margin-bottom: 16px; }
 .stream-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -164,14 +81,9 @@ h1 {
   overflow: hidden;
   position: relative;
   aspect-ratio: 16 / 9;
-  min-height: 380px;
+  max-height: 360px;
 }
-.stream-card iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-}
+.stream-card iframe { width: 100%; height: 100%; border: 0; display: block; }
 .stream-card .live-badge {
   position: absolute;
   top: 12px;
@@ -198,125 +110,157 @@ h1 {
   background: #fff;
   animation: pulse 1.5s infinite;
 }
-.side-stack {
-  display: flex;
-  flex-direction: column;
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
+  margin-bottom: 16px;
 }
-.side-stack .card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.card {
+@media (max-width: 1100px) { .chart-grid { grid-template-columns: 1fr; } }
+
+.chart-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 18px;
-  position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 460px;
 }
-.card-head {
+.chart-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  background: rgba(0,0,0,0.25);
 }
-.venue {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: var(--muted);
-}
-.market {
+.chart-head .left { display: flex; gap: 10px; align-items: center; }
+.chart-head .venue { font-size: 13px; font-weight: 600; color: var(--text); }
+.chart-head .market {
   font-family: "SF Mono", monospace;
   font-size: 10px;
   color: var(--accent);
   background: rgba(58, 165, 255, 0.1);
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 4px;
 }
-.price {
-  font-size: 36px;
+.chart-head .right { display: flex; gap: 14px; align-items: baseline; }
+.chart-head .live-price {
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: -1px;
-  margin: 8px 0 4px;
   font-variant-numeric: tabular-nums;
 }
-.price.flash-up { color: var(--green); transition: color 0.1s; }
-.price.flash-down { color: var(--red); transition: color 0.1s; }
-.change {
-  font-size: 14px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-.change.up { color: var(--green); }
-.change.down { color: var(--red); }
-.change.flat { color: var(--muted); }
-.spark {
-  width: 100%;
-  height: 80px;
-  margin-top: 12px;
-  background: var(--card2);
-  border-radius: 6px;
-}
-.meta {
+.chart-head .live-price.flash-up { color: var(--green); transition: color 0.1s; }
+.chart-head .live-price.flash-down { color: var(--red); transition: color 0.1s; }
+.chart-head .d24 { font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--muted); }
+.chart-head .d24.up { color: var(--green); }
+.chart-head .d24.down { color: var(--red); }
+
+.chart-body {
+  flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 12px;
-  font-size: 11px;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
+  grid-template-columns: 1fr 200px;
+  min-height: 380px;
 }
-.meta div { display: flex; justify-content: space-between; }
-.meta strong {
-  color: var(--text);
-  font-weight: 500;
+.chart-frame-wrap {
+  position: relative;
+  background: var(--card2);
 }
-.summary-strip {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 20px;
-  margin-bottom: 16px;
+.tv-chart { position: absolute; inset: 0; }
+
+.ob-wrap {
+  border-left: 1px solid var(--border);
   display: flex;
-  gap: 32px;
-  flex-wrap: wrap;
-  font-size: 13px;
-  color: var(--muted);
-}
-.summary-strip strong { color: var(--text); font-variant-numeric: tabular-nums; }
-.note {
-  margin-top: 24px;
-  padding: 16px;
-  background: rgba(255, 200, 87, 0.05);
-  border-left: 3px solid var(--gold);
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-.market-clock {
+  flex-direction: column;
+  background: rgba(0,0,0,0.15);
   font-family: "SF Mono", monospace;
   font-size: 11px;
-  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.ob-section {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ob-section.asks { justify-content: flex-end; }
+.ob-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 1px 8px;
+  position: relative;
+  line-height: 16px;
+}
+.ob-row .px { z-index: 1; }
+.ob-row .sz { text-align: right; z-index: 1; color: var(--muted); }
+.ob-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background: var(--bar-color);
+  width: var(--bar-width, 0%);
+  opacity: 0.15;
+}
+.ob-row.ask { color: var(--red); --bar-color: var(--red); }
+.ob-row.bid { color: var(--green); --bar-color: var(--green); }
+.ob-spread {
+  padding: 6px 8px;
+  text-align: center;
+  background: rgba(0,0,0,0.3);
+  color: var(--gold);
+  font-size: 10px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.ob-header {
+  padding: 6px 10px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.2);
+}
+.ob-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+  padding: 12px;
+}
+
+.note {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 200, 87, 0.04);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
 }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>🚀 SpaceX Pre-IPO — Live Across Venues</h1>
+  <h1>🚀 SpaceX Pre-IPO — Multi-Venue Live</h1>
   <div class="header-meta">
     <span class="market-clock" id="clock">--:--:-- UTC</span>
     <span><span class="dot live"></span><span id="connCount">0</span>/4 venues live</span>
   </div>
 </div>
 
-<div class="summary-strip" id="summary">
+<div class="summary-strip">
   <div>Highest: <strong id="hi">—</strong></div>
   <div>Lowest: <strong id="lo">—</strong></div>
   <div>Spread: <strong id="spread">—</strong></div>
@@ -333,170 +277,153 @@ h1 {
       referrerpolicy="strict-origin-when-cross-origin"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       allowfullscreen></iframe>
-    <div id="yt-fallback" style="display:none;position:absolute;inset:0;background:rgba(10,10,20,0.95);
-                                  color:var(--text);padding:24px;font-size:13px;line-height:1.6;
-                                  flex-direction:column;justify-content:center;align-items:center;
-                                  text-align:center;gap:12px;z-index:5;">
-      <div style="font-size:16px;font-weight:600;color:var(--gold);">YouTube embed blocked from <code>file://</code></div>
-      <div style="color:var(--muted);max-width:480px;">
-        Many live streams refuse to embed when the page is opened directly from disk (no origin header).
-        Run a tiny local server so the page loads from <code>http://localhost</code>:
-      </div>
-      <pre style="background:var(--card2);padding:10px 14px;border-radius:6px;color:var(--accent);
-                   font-family:'SF Mono',monospace;font-size:12px;text-align:left;">cd "/Users/benruane/Claude Code/SEDA Feeds"
-python3 -m http.server 8000
-# then open http://localhost:8000/SPACEX_Live_Dashboard.html</pre>
-      <a href="https://www.youtube.com/watch?v=KKvEQ6vCnOQ" target="_blank"
-         style="color:var(--accent);text-decoration:none;border:1px solid var(--accent);
-                padding:8px 18px;border-radius:6px;margin-top:4px;">↗ Watch on YouTube instead</a>
-    </div>
-  </div>
-  <div class="side-stack">
-    <div class="card" data-venue="binance">
-      <div class="card-head">
-        <span class="venue">Binance</span>
-        <span class="market">SPCXUSDT (perp)</span>
-      </div>
-      <div class="price" id="price-binance-side">—</div>
-      <div class="change" id="change-binance-side">awaiting first tick…</div>
-    </div>
-    <div class="card" data-venue="tradexyz">
-      <div class="card-head">
-        <span class="venue">trade.xyz</span>
-        <span class="market">xyz:SPCX (HIP-3)</span>
-      </div>
-      <div class="price" id="price-tradexyz-side">—</div>
-      <div class="change" id="change-tradexyz-side">awaiting first tick…</div>
-    </div>
   </div>
 </div>
 
 <div class="chart-grid">
+
+  <!-- Binance -->
   <div class="chart-card">
     <div class="chart-head">
       <div class="left">
         <span class="venue">Binance</span>
         <span class="market">SPCXUSDT</span>
       </div>
-      <div class="live-price" id="livehead-binance">—</div>
+      <div class="right">
+        <span class="d24" id="d24-binance">—</span>
+        <span class="live-price" id="livehead-binance">—</span>
+      </div>
     </div>
-    <div class="chart-frame-wrap"><div class="tv-chart" id="chart-binance"></div></div>
+    <div class="chart-body">
+      <div class="chart-frame-wrap"><div class="tv-chart" id="chart-binance"></div></div>
+      <div class="ob-wrap">
+        <div class="ob-header"><span>Price (USDT)</span><span>Size</span></div>
+        <div class="ob-section asks" id="ob-asks-binance"></div>
+        <div class="ob-spread" id="ob-spread-binance">—</div>
+        <div class="ob-section bids" id="ob-bids-binance"></div>
+      </div>
+    </div>
   </div>
 
+  <!-- trade.xyz -->
   <div class="chart-card">
     <div class="chart-head">
       <div class="left">
         <span class="venue">trade.xyz</span>
         <span class="market">xyz:SPCX</span>
       </div>
-      <div class="live-price" id="livehead-tradexyz">—</div>
+      <div class="right">
+        <span class="d24" id="d24-tradexyz">—</span>
+        <span class="live-price" id="livehead-tradexyz">—</span>
+      </div>
     </div>
-    <div class="chart-frame-wrap"><div class="tv-chart" id="chart-tradexyz"></div></div>
+    <div class="chart-body">
+      <div class="chart-frame-wrap"><div class="tv-chart" id="chart-tradexyz"></div></div>
+      <div class="ob-wrap">
+        <div class="ob-header"><span>Price (USDC)</span><span>Size</span></div>
+        <div class="ob-section asks" id="ob-asks-tradexyz"></div>
+        <div class="ob-spread" id="ob-spread-tradexyz">—</div>
+        <div class="ob-section bids" id="ob-bids-tradexyz"></div>
+      </div>
+    </div>
   </div>
 
+  <!-- Ventuals -->
   <div class="chart-card">
     <div class="chart-head">
       <div class="left">
         <span class="venue">Ventuals</span>
         <span class="market">vntl:SPACEX</span>
       </div>
-      <div class="live-price" id="livehead-ventuals">—</div>
+      <div class="right">
+        <span class="d24" id="d24-ventuals">—</span>
+        <span class="live-price" id="livehead-ventuals">—</span>
+      </div>
     </div>
-    <div class="chart-frame-wrap"><div class="tv-chart" id="chart-ventuals"></div></div>
+    <div class="chart-body">
+      <div class="chart-frame-wrap"><div class="tv-chart" id="chart-ventuals"></div></div>
+      <div class="ob-wrap">
+        <div class="ob-header"><span>Price (USDC)</span><span>Size</span></div>
+        <div class="ob-section asks" id="ob-asks-ventuals"></div>
+        <div class="ob-spread" id="ob-spread-ventuals">—</div>
+        <div class="ob-section bids" id="ob-bids-ventuals"></div>
+      </div>
+    </div>
   </div>
 
+  <!-- Lighter -->
   <div class="chart-card">
     <div class="chart-head">
       <div class="left">
         <span class="venue">Lighter</span>
         <span class="market">SPACEX (id 173)</span>
       </div>
-      <div class="live-price" id="livehead-lighter">—</div>
+      <div class="right">
+        <span class="d24" id="d24-lighter">—</span>
+        <span class="live-price" id="livehead-lighter">—</span>
+      </div>
     </div>
-    <div class="chart-frame-wrap"><div class="tv-chart" id="chart-lighter"></div></div>
-  </div>
-</div>
-
-<div class="grid" id="grid">
-  <div class="card" data-venue="binance">
-    <div class="card-head">
-      <span class="venue">Binance</span>
-      <span class="market">SPCXUSDT (perp)</span>
-    </div>
-    <div class="price" id="price-binance">—</div>
-    <div class="change" id="change-binance">awaiting first tick…</div>
-    <canvas class="spark" data-venue="binance"></canvas>
-    <div class="meta">
-      <div>24h change <strong id="d24-binance">—</strong></div>
-      <div>Best bid <strong id="bid-binance">—</strong></div>
-      <div>Last update <strong id="ts-binance">—</strong></div>
-      <div>Best ask <strong id="ask-binance">—</strong></div>
+    <div class="chart-body">
+      <div class="chart-frame-wrap"><div class="tv-chart" id="chart-lighter"></div></div>
+      <div class="ob-wrap">
+        <div class="ob-header"><span>Price (USDC)</span><span>Size</span></div>
+        <div class="ob-section asks" id="ob-asks-lighter"></div>
+        <div class="ob-spread" id="ob-spread-lighter">—</div>
+        <div class="ob-section bids" id="ob-bids-lighter"></div>
+      </div>
     </div>
   </div>
 
-  <div class="card" data-venue="tradexyz">
-    <div class="card-head">
-      <span class="venue">trade.xyz</span>
-      <span class="market">xyz:SPCX (HIP-3)</span>
-    </div>
-    <div class="price" id="price-tradexyz">—</div>
-    <div class="change" id="change-tradexyz">awaiting first tick…</div>
-    <canvas class="spark" data-venue="tradexyz"></canvas>
-    <div class="meta">
-      <div>24h change <strong id="d24-tradexyz">—</strong></div>
-      <div>Mark <strong id="bid-tradexyz">—</strong></div>
-      <div>Last update <strong id="ts-tradexyz">—</strong></div>
-      <div>Oracle <strong id="ask-tradexyz">—</strong></div>
-    </div>
-  </div>
-
-  <div class="card" data-venue="ventuals">
-    <div class="card-head">
-      <span class="venue">Ventuals</span>
-      <span class="market">vntl:SPACEX (HIP-3)</span>
-    </div>
-    <div class="price" id="price-ventuals">—</div>
-    <div class="change" id="change-ventuals">awaiting first tick…</div>
-    <canvas class="spark" data-venue="ventuals"></canvas>
-    <div class="meta">
-      <div>24h change <strong id="d24-ventuals">—</strong></div>
-      <div>Mark <strong id="bid-ventuals">—</strong></div>
-      <div>Last update <strong id="ts-ventuals">—</strong></div>
-      <div>Oracle <strong id="ask-ventuals">—</strong></div>
-    </div>
-  </div>
-
-  <div class="card" data-venue="lighter">
-    <div class="card-head">
-      <span class="venue">Lighter</span>
-      <span class="market">SPACEX (mid 173)</span>
-    </div>
-    <div class="price" id="price-lighter">—</div>
-    <div class="change" id="change-lighter">awaiting first tick…</div>
-    <canvas class="spark" data-venue="lighter"></canvas>
-    <div class="meta">
-      <div>24h change <strong id="d24-lighter">—</strong></div>
-      <div>Bid <strong id="bid-lighter">—</strong></div>
-      <div>Last update <strong id="ts-lighter">—</strong></div>
-      <div>Ask <strong id="ask-lighter">—</strong></div>
-    </div>
-  </div>
 </div>
 
 <div class="note">
-  <strong>Note on price disparity:</strong> SpaceX pre-IPO synthetic perps reference different share-class / valuation assumptions on each venue, so absolute prices can vary by 10×+ across venues. trade.xyz and Binance typically use one convention while Lighter's <code>SPACEX</code> uses a higher per-unit base (often the "full-share" equivalent). Compare <strong>% moves</strong>, not absolute prices.<br><br>
-  <strong>About the "transition to live stock":</strong> SpaceX isn't publicly listed yet — these are all synthetic pre-IPO perps. When NYSE opens, perp prices will tighten as TradFi-aware traders re-balance, but the underlying remains private until an actual IPO.<br><br>
-  <strong>Data sources:</strong> Binance USDM Futures WS · Hyperliquid WS (xyz + vntl dexes via <code>activeAssetCtx</code>) · Lighter WS (market_stats channel)
+  Charts rendered with Lightweight Charts using each venue's native candle endpoint. Volume bars at bottom of each chart. Order book is top-10 levels on each side, updated via WebSocket (Binance: <code>@depth10@100ms</code>; HL: <code>l2Book</code>; Lighter: <code>order_book/173</code>). Compare % moves rather than absolute prices — venues reference different share-class assumptions.
 </div>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script>
 // ============================================================
-//   SpaceX multi-venue live dashboard
+//   Helpers
 // ============================================================
-
-// ─── Chart factory (Lightweight Charts, TradingView's free OSS lib) ───
+const venues = {
+  binance:  { lastPrice: null, prev: null, live: false, candleSec: 60 },
+  tradexyz: { lastPrice: null, prev: null, live: false, candleSec: 60 },
+  ventuals: { lastPrice: null, prev: null, live: false, candleSec: 60 },
+  lighter:  { lastPrice: null, prev: null, live: false, candleSec: 60 },
+};
 const charts = {};
+
+const fmtUSD = (n, d = 2) => n == null || isNaN(n) ? "—"
+  : "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmtNum = (n, d = 2) => n == null || isNaN(n) ? "—"
+  : Number(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const now = () => new Date().toISOString().slice(11, 19);
+
+function flash(el, dir) {
+  el.classList.remove("flash-up", "flash-down");
+  void el.offsetWidth;
+  el.classList.add(dir > 0 ? "flash-up" : "flash-down");
+  setTimeout(() => el.classList.remove("flash-up", "flash-down"), 300);
+}
+
+function setLive(venue, live) {
+  venues[venue].live = live;
+  const count = Object.values(venues).filter(v => v.live).length;
+  document.getElementById("connCount").textContent = count;
+}
+
+function set24h(venue, pct) {
+  if (pct == null || isNaN(pct)) return;
+  const el = document.getElementById("d24-" + venue);
+  if (!el) return;
+  el.classList.remove("up", "down");
+  el.classList.add(pct > 0 ? "up" : pct < 0 ? "down" : "");
+  el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
+}
+
+// ============================================================
+//   Chart factory (price + volume on same chart)
+// ============================================================
 function makeChart(containerId, venueKey) {
   const el = document.getElementById(containerId);
   if (!el || !window.LightweightCharts) return null;
@@ -507,11 +434,11 @@ function makeChart(containerId, venueKey) {
       horzLines: { color: "rgba(42,42,74,0.3)" },
     },
     timeScale: { timeVisible: true, secondsVisible: false, borderColor: "#2a2a4a" },
-    rightPriceScale: { borderColor: "#2a2a4a" },
+    rightPriceScale: { borderColor: "#2a2a4a", scaleMargins: { top: 0.05, bottom: 0.28 } },
     crosshair: { mode: 1 },
     autoSize: true,
   });
-  const series = c.addCandlestickSeries({
+  const candleSeries = c.addCandlestickSeries({
     upColor: "#00d68f",
     downColor: "#ff4d6d",
     borderUpColor: "#00d68f",
@@ -519,13 +446,24 @@ function makeChart(containerId, venueKey) {
     wickUpColor: "#00d68f",
     wickDownColor: "#ff4d6d",
   });
-  charts[venueKey] = { chart: c, series, candles: [], lastCandle: null, candleSec: 60 };
+  const volumeSeries = c.addHistogramSeries({
+    color: "rgba(58, 165, 255, 0.4)",
+    priceFormat: { type: "volume" },
+    priceScaleId: "",
+  });
+  volumeSeries.priceScale().applyOptions({
+    scaleMargins: { top: 0.78, bottom: 0 },
+  });
+  charts[venueKey] = {
+    chart: c, candleSeries, volumeSeries,
+    lastCandle: null, lastVolume: null, candleSec: 60,
+  };
   return charts[venueKey];
 }
 
 function updateLiveCandle(venueKey, price) {
   const ch = charts[venueKey];
-  if (!ch || !ch.series) return;
+  if (!ch || !ch.candleSeries) return;
   const nowSec = Math.floor(Date.now() / 1000);
   const bucket = Math.floor(nowSec / ch.candleSec) * ch.candleSec;
   if (!ch.lastCandle || ch.lastCandle.time !== bucket) {
@@ -535,240 +473,83 @@ function updateLiveCandle(venueKey, price) {
     if (price > ch.lastCandle.high) ch.lastCandle.high = price;
     if (price < ch.lastCandle.low)  ch.lastCandle.low  = price;
   }
-  ch.series.update(ch.lastCandle);
+  ch.candleSeries.update(ch.lastCandle);
 }
 
-function seedCandles(venueKey, candles, candleSec = 60) {
+function seedCandles(venueKey, candles, volumes) {
   const ch = charts[venueKey];
   if (!ch || !candles?.length) return;
-  ch.candleSec = candleSec;
-  ch.series.setData(candles);
+  ch.candleSeries.setData(candles);
+  if (volumes?.length) ch.volumeSeries.setData(volumes);
   ch.lastCandle = { ...candles[candles.length - 1] };
   ch.chart.timeScale().fitContent();
 }
 
-// ─── Initialise charts after Lightweight Charts loads ───
-window.addEventListener("DOMContentLoaded", () => {
-  if (!window.LightweightCharts) {
-    console.warn("Lightweight Charts failed to load");
-    return;
+// ============================================================
+//   Order book renderer
+// ============================================================
+function renderBook(venue, bids, asks) {
+  // bids: array of [price, size], highest first
+  // asks: array of [price, size], lowest first
+  bids = (bids || []).filter(([p,s]) => p > 0 && s > 0).slice(0, 10);
+  asks = (asks || []).filter(([p,s]) => p > 0 && s > 0).slice(0, 10);
+
+  const bidsEl = document.getElementById("ob-bids-" + venue);
+  const asksEl = document.getElementById("ob-asks-" + venue);
+  const spreadEl = document.getElementById("ob-spread-" + venue);
+  if (!bidsEl || !asksEl) return;
+
+  const maxSize = Math.max(
+    ...bids.map(([_, s]) => s),
+    ...asks.map(([_, s]) => s),
+    0.0001
+  );
+
+  const renderSide = (rows, side) => rows
+    .map(([px, sz]) => {
+      const w = Math.min(100, (sz / maxSize) * 100).toFixed(1);
+      return `<div class="ob-row ${side}" style="--bar-width:${w}%;">
+        <span class="px">${px < 1 ? px.toFixed(5) : px < 100 ? px.toFixed(3) : px.toFixed(2)}</span>
+        <span class="sz">${sz < 1 ? sz.toFixed(4) : sz.toFixed(2)}</span>
+      </div>`;
+    }).join("");
+
+  // asks rendered high→low so top of section shows highest ask (further from mid)
+  asksEl.innerHTML = renderSide(asks.slice().reverse(), "ask");
+  bidsEl.innerHTML = renderSide(bids, "bid");
+
+  if (bids.length && asks.length) {
+    const bestBid = bids[0][0];
+    const bestAsk = asks[0][0];
+    const mid = (bestBid + bestAsk) / 2;
+    const spread = bestAsk - bestBid;
+    const spreadBps = (spread / mid) * 10000;
+    spreadEl.textContent = `${spread < 1 ? spread.toFixed(4) : spread.toFixed(2)} · ${spreadBps.toFixed(1)} bps`;
+  } else {
+    spreadEl.textContent = "—";
   }
-  makeChart("chart-binance",  "binance");
-  makeChart("chart-tradexyz", "tradexyz");
-  makeChart("chart-ventuals", "ventuals");
-  makeChart("chart-lighter",  "lighter");
-  loadAllCandles();
-});
-
-// ─── Candle loaders (per venue) ───
-async function loadBinanceCandles() {
-  try {
-    const r = await fetch("https://fapi.binance.com/fapi/v1/klines?symbol=SPCXUSDT&interval=1m&limit=300");
-    const k = await r.json();
-    const candles = k.map(row => ({
-      time: Math.floor(row[0] / 1000),
-      open:  parseFloat(row[1]),
-      high:  parseFloat(row[2]),
-      low:   parseFloat(row[3]),
-      close: parseFloat(row[4]),
-    }));
-    seedCandles("binance", candles, 60);
-  } catch (e) { console.warn("binance candles", e); }
 }
 
-async function loadHLCandles(dex, coin, venueKey) {
-  try {
-    const end   = Date.now();
-    const start = end - 1000 * 60 * 60 * 6; // last 6h
-    const r = await fetch("https://api.hyperliquid.xyz/info", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "candleSnapshot",
-        req:  { coin: `${dex}:${coin}`, interval: "1m", startTime: start, endTime: end },
-      }),
-    });
-    const k = await r.json();
-    const candles = (Array.isArray(k) ? k : []).map(c => ({
-      time: Math.floor(c.t / 1000),
-      open:  parseFloat(c.o),
-      high:  parseFloat(c.h),
-      low:   parseFloat(c.l),
-      close: parseFloat(c.c),
-    })).filter(c => !isNaN(c.open));
-    seedCandles(venueKey, candles, 60);
-  } catch (e) { console.warn(`HL candles ${dex}:${coin}`, e); }
-}
-
-async function loadLighterCandles() {
-  try {
-    const end   = Math.floor(Date.now() / 1000);
-    const start = end - 60 * 60 * 6;
-    const url = `https://mainnet.zklighter.elliot.ai/api/v1/candlesticks?market_id=173&resolution=1m&start_timestamp=${start}&end_timestamp=${end}&count_back=300`;
-    const r = await fetch(url);
-    const j = await r.json();
-    const arr = j.candlesticks || j.candles || j.data || [];
-    const candles = arr.map(c => ({
-      time:  Math.floor((c.timestamp || c.t || c.time) / (String(c.timestamp || c.t || c.time).length > 11 ? 1000 : 1)),
-      open:  parseFloat(c.open  ?? c.o),
-      high:  parseFloat(c.high  ?? c.h),
-      low:   parseFloat(c.low   ?? c.l),
-      close: parseFloat(c.close ?? c.c),
-    })).filter(c => !isNaN(c.open));
-    seedCandles("lighter", candles, 60);
-  } catch (e) { console.warn("lighter candles", e); }
-}
-
-function loadAllCandles() {
-  loadBinanceCandles();
-  loadHLCandles("xyz",  "SPCX",   "tradexyz");
-  loadHLCandles("vntl", "SPACEX", "ventuals");
-  loadLighterCandles();
-}
-
-// refresh candles every 2 min so history stays fresh
-setInterval(loadAllCandles, 2 * 60 * 1000);
-
-const venues = {
-  binance:  { history: [], prev: null, lastPrice: null, live: false, scale: 1 },
-  tradexyz: { history: [], prev: null, lastPrice: null, live: false, scale: 1 },
-  ventuals: { history: [], prev: null, lastPrice: null, live: false, scale: 1 },
-  lighter:  { history: [], prev: null, lastPrice: null, live: false, scale: 1 },
-};
-
-const MAX_POINTS = 300;
-const fmtUSD = (n) => n == null ? "—" :
-  "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const fmtPct = (a, b) => {
-  if (a == null || b == null || b === 0) return "—";
-  const p = ((a - b) / b) * 100;
-  const sign = p >= 0 ? "+" : "";
-  return sign + p.toFixed(2) + "%";
-};
-const now = () => new Date().toISOString().slice(11, 19);
-
-function flash(el, dir) {
-  el.classList.remove("flash-up", "flash-down");
-  void el.offsetWidth;
-  el.classList.add(dir > 0 ? "flash-up" : "flash-down");
-  setTimeout(() => el.classList.remove("flash-up", "flash-down"), 300);
-}
-
-function updatePrice(venue, price, extra = {}) {
+// ============================================================
+//   Price tile update (used by every WS)
+// ============================================================
+function updatePrice(venue, price, extras = {}) {
   if (price == null || isNaN(price)) return;
   const v = venues[venue];
   const prevPrice = v.lastPrice;
   v.lastPrice = price;
-  v.history.push({ t: Date.now(), p: price });
-  if (v.history.length > MAX_POINTS) v.history.shift();
   if (v.prev == null) v.prev = price;
 
-  const priceEl = document.getElementById("price-" + venue);
-  priceEl.textContent = fmtUSD(price);
-  if (prevPrice != null && prevPrice !== price) flash(priceEl, price - prevPrice);
-
-  // Mirror to side panel (for binance + tradexyz, shown next to the stream)
-  const sideEl = document.getElementById("price-" + venue + "-side");
-  if (sideEl) {
-    sideEl.textContent = fmtUSD(price);
-    if (prevPrice != null && prevPrice !== price) flash(sideEl, price - prevPrice);
-  }
-
-  // Mirror to chart-card live header
   const headEl = document.getElementById("livehead-" + venue);
   if (headEl) {
     headEl.textContent = fmtUSD(price);
     if (prevPrice != null && prevPrice !== price) flash(headEl, price - prevPrice);
   }
 
-  // Update the live candle on the venue's chart
   updateLiveCandle(venue, price);
-
-  const chgEl = document.getElementById("change-" + venue);
-  const chg = price - v.prev;
-  const chgPct = (chg / v.prev) * 100;
-  chgEl.classList.remove("up", "down", "flat");
-  chgEl.classList.add(chgPct > 0.01 ? "up" : chgPct < -0.01 ? "down" : "flat");
-  const sign = chg >= 0 ? "+" : "";
-  const changeText = `${sign}${fmtUSD(chg).replace("$","")} (${sign}${chgPct.toFixed(2)}%) since open`;
-  chgEl.textContent = changeText;
-  const sideChgEl = document.getElementById("change-" + venue + "-side");
-  if (sideChgEl) {
-    sideChgEl.classList.remove("up", "down", "flat");
-    sideChgEl.classList.add(chgPct > 0.01 ? "up" : chgPct < -0.01 ? "down" : "flat");
-    sideChgEl.textContent = changeText;
-  }
-
-  document.getElementById("ts-" + venue).textContent = now();
-  if (extra.bid != null) document.getElementById("bid-" + venue).textContent = fmtUSD(extra.bid);
-  if (extra.ask != null) document.getElementById("ask-" + venue).textContent = fmtUSD(extra.ask);
-  if (extra.d24Pct != null) {
-    const el = document.getElementById("d24-" + venue);
-    el.textContent = (extra.d24Pct >= 0 ? "+" : "") + extra.d24Pct.toFixed(2) + "%";
-    el.style.color = extra.d24Pct > 0 ? "var(--green)" : extra.d24Pct < 0 ? "var(--red)" : "var(--muted)";
-  }
-  drawSpark(venue);
   updateSummary();
-}
 
-function setLive(venue, live) {
-  venues[venue].live = live;
-  const count = Object.values(venues).filter(v => v.live).length;
-  document.getElementById("connCount").textContent = count;
-}
-
-function drawSpark(venue) {
-  const canvas = document.querySelector(`canvas[data-venue="${venue}"]`);
-  const ctx = canvas.getContext("2d");
-  const data = venues[venue].history;
-  if (data.length < 2) return;
-
-  const dpr = window.devicePixelRatio || 1;
-  const w = canvas.clientWidth;
-  const h = canvas.clientHeight;
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, w, h);
-
-  const prices = data.map(d => d.p);
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const range = max - min || 1;
-  const xStep = w / (data.length - 1);
-
-  const first = prices[0];
-  const last = prices[prices.length - 1];
-  const isUp = last >= first;
-  const color = isUp ? "#00d68f" : "#ff4d6d";
-
-  // gradient fill
-  const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, color + "44");
-  grad.addColorStop(1, color + "00");
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.moveTo(0, h);
-  data.forEach((d, i) => {
-    const x = i * xStep;
-    const y = h - ((d.p - min) / range) * (h - 8) - 4;
-    ctx.lineTo(x, y);
-  });
-  ctx.lineTo(w, h);
-  ctx.closePath();
-  ctx.fill();
-
-  // line
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.6;
-  ctx.beginPath();
-  data.forEach((d, i) => {
-    const x = i * xStep;
-    const y = h - ((d.p - min) / range) * (h - 8) - 4;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
-  ctx.stroke();
+  if (extras.d24 != null) set24h(venue, extras.d24);
 }
 
 function updateSummary() {
@@ -783,45 +564,127 @@ function updateSummary() {
 }
 
 // ============================================================
-//   YouTube embed: show fallback hint if loaded from file://
+//   Init charts after lib loads
 // ============================================================
-(function() {
-  const fb = document.getElementById("yt-fallback");
-  const frame = document.getElementById("yt-frame");
-  if (window.location.protocol === "file:") {
-    if (fb) fb.style.display = "flex";
-    if (frame) frame.style.display = "none";
+window.addEventListener("DOMContentLoaded", () => {
+  if (!window.LightweightCharts) {
+    console.warn("Lightweight Charts failed to load");
+    return;
   }
-})();
+  makeChart("chart-binance",  "binance");
+  makeChart("chart-tradexyz", "tradexyz");
+  makeChart("chart-ventuals", "ventuals");
+  makeChart("chart-lighter",  "lighter");
+  loadAllCandles();
+});
 
 // ============================================================
-//   NYSE open countdown (9:30 ET = 13:30 or 14:30 UTC depending on DST)
+//   Candle loaders (per venue)
+// ============================================================
+async function loadBinanceCandles() {
+  try {
+    const r = await fetch("https://fapi.binance.com/fapi/v1/klines?symbol=SPCXUSDT&interval=1m&limit=300");
+    const k = await r.json();
+    const candles = k.map(row => ({
+      time: Math.floor(row[0] / 1000),
+      open:  parseFloat(row[1]),
+      high:  parseFloat(row[2]),
+      low:   parseFloat(row[3]),
+      close: parseFloat(row[4]),
+    }));
+    const volumes = k.map(row => ({
+      time: Math.floor(row[0] / 1000),
+      value: parseFloat(row[5]),
+      color: parseFloat(row[4]) >= parseFloat(row[1]) ? "rgba(0,214,143,0.5)" : "rgba(255,77,109,0.5)",
+    }));
+    seedCandles("binance", candles, volumes);
+  } catch (e) { console.warn("binance candles", e); }
+}
+
+async function loadHLCandles(dex, coin, venueKey) {
+  try {
+    const end   = Date.now();
+    const start = end - 1000 * 60 * 60 * 6;
+    const r = await fetch("https://api.hyperliquid.xyz/info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "candleSnapshot",
+        req:  { coin: `${dex}:${coin}`, interval: "1m", startTime: start, endTime: end },
+      }),
+    });
+    const k = await r.json();
+    const arr = Array.isArray(k) ? k : [];
+    const candles = arr.map(c => ({
+      time: Math.floor(c.t / 1000),
+      open:  parseFloat(c.o),
+      high:  parseFloat(c.h),
+      low:   parseFloat(c.l),
+      close: parseFloat(c.c),
+    })).filter(c => !isNaN(c.open));
+    const volumes = arr.map(c => ({
+      time: Math.floor(c.t / 1000),
+      value: parseFloat(c.v) || 0,
+      color: parseFloat(c.c) >= parseFloat(c.o) ? "rgba(0,214,143,0.5)" : "rgba(255,77,109,0.5)",
+    }));
+    seedCandles(venueKey, candles, volumes);
+  } catch (e) { console.warn(`HL candles ${dex}:${coin}`, e); }
+}
+
+async function loadLighterCandles() {
+  try {
+    const end   = Math.floor(Date.now() / 1000);
+    const start = end - 60 * 60 * 6;
+    const url = `https://mainnet.zklighter.elliot.ai/api/v1/candlesticks?market_id=173&resolution=1m&start_timestamp=${start}&end_timestamp=${end}&count_back=300`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const arr = j.candlesticks || j.candles || j.data || [];
+    const candles = arr.map(c => {
+      const ts = c.timestamp || c.t || c.time;
+      return {
+        time: Math.floor(ts / (String(ts).length > 11 ? 1000 : 1)),
+        open:  parseFloat(c.open  ?? c.o),
+        high:  parseFloat(c.high  ?? c.h),
+        low:   parseFloat(c.low   ?? c.l),
+        close: parseFloat(c.close ?? c.c),
+      };
+    }).filter(c => !isNaN(c.open));
+    const volumes = arr.map(c => {
+      const ts = c.timestamp || c.t || c.time;
+      const open = parseFloat(c.open ?? c.o);
+      const close = parseFloat(c.close ?? c.c);
+      return {
+        time: Math.floor(ts / (String(ts).length > 11 ? 1000 : 1)),
+        value: parseFloat(c.volume ?? c.v ?? c.base_volume ?? 0),
+        color: close >= open ? "rgba(0,214,143,0.5)" : "rgba(255,77,109,0.5)",
+      };
+    });
+    seedCandles("lighter", candles, volumes);
+  } catch (e) { console.warn("lighter candles", e); }
+}
+
+function loadAllCandles() {
+  loadBinanceCandles();
+  loadHLCandles("xyz",  "SPCX",   "tradexyz");
+  loadHLCandles("vntl", "SPACEX", "ventuals");
+  loadLighterCandles();
+}
+setInterval(loadAllCandles, 2 * 60 * 1000);
+
+// ============================================================
+//   NYSE open countdown
 // ============================================================
 function updateClock() {
   const d = new Date();
   document.getElementById("clock").textContent = d.toISOString().slice(11, 19) + " UTC";
-
-  // NYSE open is 9:30 ET. During EDT (Mar-Nov) that's 13:30 UTC; during EST that's 14:30 UTC.
-  // June is EDT → 13:30 UTC.
-  const isEDT = (() => {
-    const m = d.getUTCMonth();
-    return m >= 2 && m <= 10; // rough — DST runs Mar-Nov
-  })();
+  const isEDT = (() => { const m = d.getUTCMonth(); return m >= 2 && m <= 10; })();
   const openHourUTC = isEDT ? 13 : 14;
-  const openMinuteUTC = 30;
-
   const open = new Date(Date.UTC(
-    d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(),
-    openHourUTC, openMinuteUTC, 0
+    d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), openHourUTC, 30, 0
   ));
   let diff = open - d;
   let label = "until open";
-  if (diff < 0) {
-    // already opened — show how long since open
-    diff = Math.abs(diff);
-    label = "since open";
-  }
-  // weekend check
+  if (diff < 0) { diff = Math.abs(diff); label = "since open"; }
   const day = d.getUTCDay();
   if (day === 0 || day === 6) {
     document.getElementById("nyseOpen").textContent = "weekend (closed)";
@@ -830,48 +693,48 @@ function updateClock() {
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const s = Math.floor((diff % 60000) / 1000);
-  document.getElementById("nyseOpen").textContent =
-    `${h}h ${m}m ${s}s ${label}`;
+  document.getElementById("nyseOpen").textContent = `${h}h ${m}m ${s}s ${label}`;
 }
 setInterval(updateClock, 1000);
 updateClock();
 
 // ============================================================
-//   BINANCE — SPCXUSDT bookTicker WS
+//   BINANCE — bookTicker + depth10@100ms
 // ============================================================
 (function connectBinance() {
-  const ws = new WebSocket("wss://fstream.binance.com/ws/spcxusdt@bookTicker");
+  const ws = new WebSocket("wss://fstream.binance.com/stream?streams=spcxusdt@bookTicker/spcxusdt@depth10@100ms");
   ws.onopen = () => setLive("binance", true);
   ws.onmessage = (e) => {
-    const d = JSON.parse(e.data);
-    const bid = parseFloat(d.b);
-    const ask = parseFloat(d.a);
-    const mid = (bid + ask) / 2;
-    updatePrice("binance", mid, { bid, ask });
+    const m = JSON.parse(e.data);
+    if (!m.stream || !m.data) return;
+    const d = m.data;
+    if (m.stream.endsWith("@bookTicker")) {
+      const bid = parseFloat(d.b);
+      const ask = parseFloat(d.a);
+      const mid = (bid + ask) / 2;
+      updatePrice("binance", mid);
+    } else if (m.stream.endsWith("@depth10@100ms")) {
+      const bids = (d.b || []).map(([p, s]) => [parseFloat(p), parseFloat(s)]);
+      const asks = (d.a || []).map(([p, s]) => [parseFloat(p), parseFloat(s)]);
+      renderBook("binance", bids, asks);
+    }
   };
   ws.onclose = () => { setLive("binance", false); setTimeout(connectBinance, 3000); };
   ws.onerror = () => ws.close();
 })();
 
-// Also pull 24h stats from Binance every 30s
 async function fetchBinance24h() {
   try {
     const r = await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=SPCXUSDT");
     const j = await r.json();
-    const pct = parseFloat(j.priceChangePercent);
-    if (!isNaN(pct)) {
-      const el = document.getElementById("d24-binance");
-      el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
-      el.style.color = pct > 0 ? "var(--green)" : pct < 0 ? "var(--red)" : "var(--muted)";
-    }
+    set24h("binance", parseFloat(j.priceChangePercent));
   } catch (e) {}
 }
 fetchBinance24h();
 setInterval(fetchBinance24h, 30000);
 
 // ============================================================
-//   HYPERLIQUID — xyz:SPCX (trade.xyz) and vntl:SPACEX (Ventuals)
-//   Use activeAssetCtx subscription for full ctx (mid, mark, oracle, funding)
+//   HYPERLIQUID — activeAssetCtx + l2Book (xyz + vntl)
 // ============================================================
 function connectHL(dex, coin, venueKey) {
   function open() {
@@ -882,24 +745,28 @@ function connectHL(dex, coin, venueKey) {
         method: "subscribe",
         subscription: { type: "activeAssetCtx", coin: `${dex}:${coin}` }
       }));
+      ws.send(JSON.stringify({
+        method: "subscribe",
+        subscription: { type: "l2Book", coin: `${dex}:${coin}` }
+      }));
     };
     ws.onmessage = (e) => {
       const m = JSON.parse(e.data);
-      if (m.channel === "activeAssetCtx" && m.data && m.data.ctx) {
+      if (m.channel === "activeAssetCtx" && m.data?.ctx) {
         const ctx = m.data.ctx;
         const mid = parseFloat(ctx.midPx);
-        const mark = parseFloat(ctx.markPx);
-        const oracle = parseFloat(ctx.oraclePx);
         if (!isNaN(mid)) {
-          updatePrice(venueKey, mid, { bid: mark, ask: oracle });
           const prev = parseFloat(ctx.prevDayPx);
-          if (!isNaN(prev) && prev > 0) {
-            const pct = ((mid - prev) / prev) * 100;
-            const el = document.getElementById("d24-" + venueKey);
-            el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
-            el.style.color = pct > 0 ? "var(--green)" : pct < 0 ? "var(--red)" : "var(--muted)";
-          }
+          const d24 = !isNaN(prev) && prev > 0 ? ((mid - prev) / prev) * 100 : null;
+          updatePrice(venueKey, mid, { d24 });
         }
+      } else if (m.channel === "l2Book" && m.data) {
+        // HL l2Book: data.levels = [bids[], asks[]]; each level = {px, sz, n}
+        const lvls = m.data.levels;
+        if (!lvls || lvls.length < 2) return;
+        const bids = lvls[0].map(l => [parseFloat(l.px), parseFloat(l.sz)]);
+        const asks = lvls[1].map(l => [parseFloat(l.px), parseFloat(l.sz)]);
+        renderBook(venueKey, bids, asks);
       }
     };
     ws.onclose = () => { setLive(venueKey, false); setTimeout(open, 3000); };
@@ -911,47 +778,32 @@ connectHL("xyz",  "SPCX",   "tradexyz");
 connectHL("vntl", "SPACEX", "ventuals");
 
 // ============================================================
-//   LIGHTER — SPACEX (market_id 173) via market_stats channel
+//   LIGHTER — order_book/173 + market_stats/173
 // ============================================================
 (function connectLighter() {
   const ws = new WebSocket("wss://mainnet.zklighter.elliot.ai/stream");
   ws.onopen = () => {
     setLive("lighter", true);
-    ws.send(JSON.stringify({
-      type: "subscribe",
-      channel: "market_stats/173"
-    }));
-    // also subscribe to ticker for the bid/ask
-    ws.send(JSON.stringify({
-      type: "subscribe",
-      channel: "order_book/173"
-    }));
+    ws.send(JSON.stringify({ type: "subscribe", channel: "market_stats/173" }));
+    ws.send(JSON.stringify({ type: "subscribe", channel: "order_book/173" }));
   };
-  let lastBook = { bid: null, ask: null };
   ws.onmessage = (e) => {
     try {
       const m = JSON.parse(e.data);
-      if (m.type === "update/market_stats" || m.type === "subscribed/market_stats") {
+      if (m.type?.includes("market_stats")) {
         const s = m.market_stats || m.stats;
         if (s) {
           const last = parseFloat(s.last_trade_price);
           if (!isNaN(last) && last > 0) {
-            updatePrice("lighter", last, lastBook);
-            const pct = parseFloat(s.daily_price_change);
-            if (!isNaN(pct)) {
-              const el = document.getElementById("d24-lighter");
-              el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
-              el.style.color = pct > 0 ? "var(--green)" : pct < 0 ? "var(--red)" : "var(--muted)";
-            }
+            updatePrice("lighter", last, { d24: parseFloat(s.daily_price_change) });
           }
         }
-      } else if (m.type === "update/order_book" || m.type === "subscribed/order_book") {
+      } else if (m.type?.includes("order_book")) {
         const ob = m.order_book || m;
-        if (ob && ob.bids && ob.asks) {
-          const bestBid = parseFloat(ob.bids[0]?.price);
-          const bestAsk = parseFloat(ob.asks[0]?.price);
-          if (!isNaN(bestBid)) lastBook.bid = bestBid;
-          if (!isNaN(bestAsk)) lastBook.ask = bestAsk;
+        if (ob?.bids && ob?.asks) {
+          const bids = ob.bids.map(b => [parseFloat(b.price ?? b.p), parseFloat(b.size ?? b.s)]);
+          const asks = ob.asks.map(a => [parseFloat(a.price ?? a.p), parseFloat(a.size ?? a.s)]);
+          renderBook("lighter", bids, asks);
         }
       }
     } catch (err) {}
@@ -959,65 +811,6 @@ connectHL("vntl", "SPACEX", "ventuals");
   ws.onclose = () => { setLive("lighter", false); setTimeout(connectLighter, 3000); };
   ws.onerror = () => ws.close();
 })();
-
-// ============================================================
-//   Seed history with one REST poll so charts show something
-//   on page load instead of waiting for first WS tick.
-// ============================================================
-async function seedTradeXyz() {
-  try {
-    const r = await fetch("https://api.hyperliquid.xyz/info", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "metaAndAssetCtxs", dex: "xyz" })
-    });
-    const [meta, ctxs] = await r.json();
-    const idx = meta.universe.findIndex(a => a.name === "xyz:SPCX");
-    if (idx >= 0) {
-      const c = ctxs[idx];
-      const mid = parseFloat(c.midPx);
-      if (!isNaN(mid)) updatePrice("tradexyz", mid, { bid: parseFloat(c.markPx), ask: parseFloat(c.oraclePx) });
-    }
-  } catch (e) {}
-}
-async function seedVentuals() {
-  try {
-    const r = await fetch("https://api.hyperliquid.xyz/info", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "metaAndAssetCtxs", dex: "vntl" })
-    });
-    const [meta, ctxs] = await r.json();
-    const idx = meta.universe.findIndex(a => a.name === "vntl:SPACEX");
-    if (idx >= 0) {
-      const c = ctxs[idx];
-      const mid = parseFloat(c.midPx);
-      if (!isNaN(mid)) updatePrice("ventuals", mid, { bid: parseFloat(c.markPx), ask: parseFloat(c.oraclePx) });
-    }
-  } catch (e) {}
-}
-async function seedLighter() {
-  try {
-    const r = await fetch("https://mainnet.zklighter.elliot.ai/api/v1/orderBookDetails?market_id=173");
-    const j = await r.json();
-    const m = j.order_book_details?.[0];
-    if (m) {
-      const last = parseFloat(m.last_trade_price);
-      if (!isNaN(last) && last > 0) {
-        updatePrice("lighter", last);
-        const pct = parseFloat(m.daily_price_change);
-        if (!isNaN(pct)) {
-          const el = document.getElementById("d24-lighter");
-          el.textContent = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
-          el.style.color = pct > 0 ? "var(--green)" : pct < 0 ? "var(--red)" : "var(--muted)";
-        }
-      }
-    }
-  } catch (e) {}
-}
-seedTradeXyz();
-seedVentuals();
-seedLighter();
 </script>
 
 </body>
